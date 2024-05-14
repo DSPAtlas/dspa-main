@@ -1,2 +1,0 @@
-# dspa-main
- full stack
