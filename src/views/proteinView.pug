@@ -17,26 +17,17 @@ block content
     .protein-info-container
         h1 Protein Information
         h2 Name: #{proteinName}
-        h1 Residue Level Barcode Plot
-        svg#residuelevelPlot(width="800", height="200")
-        script.
-            const data = !{JSON.stringify(data)};
-            const proteinSequence = "#{proteinSequence}";
-            const htmlid = "#{htmlid}";
-            document.addEventListener("DOMContentLoaded", function() {
-                plotResidueLevelBarcode(data, proteinSequence, htmlid);
-        });
         if success
             p Sequence: 
-                pre.sequence #{sequence}
-            if residueLevelPlot && residueLevelPlot.length > 0
-                h3 
-                    | Residue Level Plot
-                    span.info-button 
-                        | ?
-                        span.tooltip Text for residue level plot info here.
-                //- Directly inject the SVG XML content into the page
-                div.plot!=residueLevelPlot
+                pre.sequence #{proteinSequence}
+            if differentialabundanceData && differentialabundanceData.length > 0
+                h3 Residue Level Plot
+                span.info-button 
+                    | ?
+                    span.tooltip Text for residue level plot info here.
+                svg#residuelevelPlot(width="800", height="200")
+                script(type="application/json" id="differentialabundanceData")!= differentialabundanceData
+                script(type="text/plain" id="proteinSequence") #{proteinSequence}
             else
                 p No residue level plot available.
             if dynamicsPlot && dynamicsPlot.length > 0
@@ -49,5 +40,8 @@ block content
                 div.plot!=dynamicsPlot
             else
                 p No dynamics plot available.
+
+            //-script(type="application/json" id="differentialabundanceData")!= differentialabundanceData
         else
             p No sequence found
+    script(src="/bundle.js")

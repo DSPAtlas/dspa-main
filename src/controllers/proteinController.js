@@ -29,14 +29,16 @@ export const searchProteins = async (req, res) => {
     // Fetch protein features, which includes sequence data and plots
     const result = await getProteinFeatures(taxonomyID, proteinName);
 
+    console.log(JSON.stringify(result.differentialabundanceData))
+
     // Check if result is not empty
     if (result) {
       res.render('proteinView', {
         success: true,
         proteinName: result.proteinName, // or whichever property has the name
-        sequence: result.sequence || "No sequence found",
-        data: result.data,
-        residueLevelPlot: result.residueLevelPlot, // Assuming this is the name used in the result object
+        proteinSequence: result.proteinSequence || "No sequence found",
+        differentialabundanceData: JSON.stringify(result.differentialabundanceData),
+        //residueLevelPlot: result.residueLevelPlot, // Assuming this is the name used in the result object
         dynamicsPlot: result.dynamicsPlot // Assuming this is the name used in the result object
       });
     } else {
@@ -44,7 +46,8 @@ export const searchProteins = async (req, res) => {
       res.render('proteinView', {
         success: false,
         proteinName: '',
-        sequence: "No sequence found",
+        proteinSequence: "No sequence found",
+        differentialabundanceData: JSON.stringify([]),
         residueLevelPlot: '', // Ensure to handle or display a message when no plot is found
         dynamicsPlot: '' // Ensure to handle or display a message when no plot is found
       });

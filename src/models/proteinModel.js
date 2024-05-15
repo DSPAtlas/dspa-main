@@ -1,6 +1,6 @@
 import db from '../config/database.js';
 import { spawn } from 'child_process';
-import {plotResidueLevelBarcode} from "dspa-viz-d3js-2";
+import vizd3js from "@dspa/vizd3js";
 
 // data handling CRUD 
 // business logic
@@ -92,8 +92,6 @@ export const getProteinFeatures = async(taxonomyID, proteinName) => {
       LiPDataFrame: JSON.stringify(differentialAbundance) // Assuming differentialAbundance is in the correct format; adjust as needed
     };
 
-    console.log(JSON.stringify(dataForPythonScript));
-
     // Get bar plots - Executes the Python script once and expects both plots in return
     const plots = await getBarPlotsFromPythonScript(dataForPythonScript);
 
@@ -112,8 +110,8 @@ export const getProteinFeatures = async(taxonomyID, proteinName) => {
     // Compile results including the plots
     const result = {
       proteinName: pgProteinAccession,
-      sequence: fastaEntry.seq,
-      data: JSON.stringify(differentialAbundance),
+      proteinSequence: fastaEntry.seq,
+      differentialabundanceData: differentialAbundance,
       // ...fastaEntry,
       residueLevelPlot: residueLevelPlot, // Assuming this is how the plots are named in the Python script output
       dynamicsPlot: dynamicsPlot

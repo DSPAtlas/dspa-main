@@ -18,6 +18,8 @@ const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'pug');
 app.set('views', './src/views');
+// Serve static files from the 'dist' directory
+app.use(express.static('dist'));
 app.use(express.static('public'));
 
 app.use(express.json());
