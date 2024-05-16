@@ -15,14 +15,12 @@ body {
     background-color: white;
     color: #333;
     line-height: 1.6;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .main-container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    /* Additional styles for layout, padding, etc. */
 }
 
 .container {
@@ -37,7 +35,6 @@ header {
   text-align: center;
   padding: 1rem 0;
 }
-
 
 footer {
     background: #BFBEC0;
@@ -56,7 +53,6 @@ h1 {
   color: #748E6C;
 
 }
-
 
 p, pre {
     margin: 10px 0;
@@ -101,6 +97,10 @@ p, pre {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 80%;
     margin: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .search-bar {
@@ -111,6 +111,7 @@ p, pre {
     border-radius: 25px; /* Rounded corners */
     background-color: transparent;
     color: #748E6C;
+    margin-bottom: 20px;
   }
   
   .search-bar:focus {
@@ -119,7 +120,9 @@ p, pre {
   
   .search-icon {
     position: absolute;
-    right: 20%; /* Position as needed */
+    right: 10%; /* Adjusted for smaller screens */
+    top: 50%;
+    transform: translateY(-50%);
   }
   
   /* Headline */
@@ -155,24 +158,52 @@ p, pre {
     color: #121212;
   }
   
-  /* Add media queries for responsiveness */
   @media (max-width: 768px) {
+    .container {
+        width: 90%;
+    }
+
+    nav {
+        flex-direction: column; /* Stack items vertically */
+        align-items: center;
+    }
+
     .search-container {
-      flex-direction: column;
+        width: 90%;
+        padding: 20px;
     }
-    
+
     .search-bar {
-      width: 80%;
+        width: 80%;
     }
-  
+
     .headline {
-      font-size: 2rem;
+        font-size: 2rem;
+        margin-top: 0; /* Adjust margin */
     }
-  
+
     .tagline {
-      font-size: 1rem;
+        font-size: 1rem;
     }
-  }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 10px;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    .headline {
+        font-size: 1.5rem;
+    }
+
+    .tagline {
+        font-size: 0.9rem;
+    }
+}
 
 
 input[type="text"], select {
@@ -216,17 +247,19 @@ input[type="submit"]:hover, button:hover {
   border-radius: 8px; /* Optional: Rounds the corners */
 }
 
-.plot {
-  text-align: center; /* Center the content horizontally */
-  overflow: auto; /* Ensures that the entire plot is viewable through scrolling if it's too wide */
-  max-width: 100%; /* Prevents the plot from exceeding the container width */
+/* Plot styling */
+.plot-container {
+  text-align: center;
+  margin: 20px 0; /* Add margin to plots */
+  overflow: auto;
 }
 
-.plot svg {
-  max-width: 100%; /* Ensure the SVG scales down if necessary */
-  height: auto; /* Maintain aspect ratio */
-  display: block; 
+.plot-container svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
+
 
 svg {
   display: block;
@@ -240,12 +273,14 @@ svg {
   display: inline-block;
   margin-left: 5px;
   cursor: pointer;
+  position: relative;
 }
 
 .info-button .tooltip {
   bottom: 100%; /* Adjust if necessary */
   left: 50%;
   transform: translateX(-50%);
+  position: absolute;
 }
 
 .tooltip {
@@ -256,14 +291,12 @@ svg {
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
-  
   /* Positioning */
   position: absolute;
   z-index: 1;
   bottom: 100%;
   left: 50%;
   margin-left: -60px; /* Centers the tooltip */
-  
   /* Hide the tooltip */
   opacity: 0;
   transition: opacity 0.3s;

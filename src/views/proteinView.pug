@@ -20,28 +20,24 @@ block content
         if success
             p Sequence: 
                 pre.sequence #{proteinSequence}
-            if differentialabundanceData && differentialabundanceData.length > 0
+            if differentialAbundanceData && differentialAbundanceData.length > 0
                 h3 Residue Level Plot
                 span.info-button 
                     | ?
                     span.tooltip Text for residue level plot info here.
-                svg#residuelevelPlot(width="800", height="200")
-                script(type="application/json" id="differentialabundanceData")!= differentialabundanceData
+                .plot-container
+                    svg#residuelevelPlot(width="800", height="200")
+                h3 Dynamics Plot
+                .plot-container
+                    svg#dynamicPlot(width="800", height="200")
+                script(type="application/json" id="differentialAbundanceData")!= differentialAbundanceData
                 script(type="text/plain" id="proteinSequence") #{proteinSequence}
             else
                 p No residue level plot available.
-            if dynamicsPlot && dynamicsPlot.length > 0
-                h3 
-                    | Dynamics Plot
-                    span.info-button 
-                        | ?
-                        span.tooltip Text for residue level plot info here.
-                //- Directly inject the SVG XML content into the page
-                div.plot!=dynamicsPlot
-            else
-                p No dynamics plot available.
-
-            //-script(type="application/json" id="differentialabundanceData")!= differentialabundanceData
         else
             p No sequence found
+        h3 Protein Viewer
+        #structureViewer
+        button#updateButton Update Highlights
+
     script(src="/bundle.js")

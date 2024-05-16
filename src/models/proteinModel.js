@@ -12,10 +12,11 @@ export const getDifferentialAbundanceByAccession = async (pgProteinAccessions) =
       const [rows] = await db.query(`
           SELECT * FROM differential_abundance
           WHERE pg_protein_accessions = ?
+          ORDER BY pos_start
       `, [pgProteinAccessions]);
       return rows;
   } catch (error) {
-      console.error('Error in findByProteinAccessions:', error);
+      console.error('Error in getDifferentialAbundanceByAccession:', error);
       throw error;
   }
 };
@@ -84,39 +85,13 @@ export const getProteinFeatures = async(taxonomyID, proteinName) => {
     const pgProteinAccession = extractProteinAccession(fastaEntry.protein_name); 
     // get differential abundance
     const differentialAbundance = await getDifferentialAbundanceByAccession(pgProteinAccession);
-    
-    // Prepare data for Python script
-    const dataForPythonScript = {
-      proteinName: pgProteinAccession,
-      sequence: fastaEntry.seq,
-      LiPDataFrame: JSON.stringify(differentialAbundance) // Assuming differentialAbundance is in the correct format; adjust as needed
-    };
+    const differentialAbundanceData = vizd3js.prepareData(differentialAbundance, fastaEntry.seq);
 
-    // Get bar plots - Executes the Python script once and expects both plots in return
-    const plots = await getBarPlotsFromPythonScript(dataForPythonScript);
-
-    let residueLevelPlot = '';
-    let dynamicsPlot = '';
-    // Listen for standard output data from the Python script
-    try {
-      const plotsData = JSON.parse(plots); // Attempt to parse the JSON string
-      residueLevelPlot = plotsData.residueLevelPlot;
-      dynamicsPlot = plotsData.dynamicsPlot;
-      // Further processing...
-    } catch (error) {
-      console.error("Failed to parse plots data:", error);
-    }
-
-    // Compile results including the plots
     const result = {
       proteinName: pgProteinAccession,
       proteinSequence: fastaEntry.seq,
-      differentialabundanceData: differentialAbundance,
-      // ...fastaEntry,
-      residueLevelPlot: residueLevelPlot, // Assuming this is how the plots are named in the Python script output
-      dynamicsPlot: dynamicsPlot
+      differentialAbundanceData: differentialAbundanceData,
     };
-
     return result;
   } catch (error) {
     console.error("Error in getProteinFeatures:", error.message);
