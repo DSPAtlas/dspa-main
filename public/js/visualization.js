@@ -1,5 +1,9 @@
 import vizd3js from "@dspa/vizd3js";
 
+if (typeof vizd3js !== 'undefined') {
+    vizd3js.initialize();
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     // Get the JSON data from the script element and parse it
     const differentialDataElement= document.getElementById('differentialAbundanceData');
