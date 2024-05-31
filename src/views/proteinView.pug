@@ -16,6 +16,15 @@ block content
     
     .protein-info-container
         h1 Protein Information
+        //- Include d3.js from a CDN
+        //-script(src="https://cdn.skypack.dev/d3@6")
+        //- Include the bundled vizd3js library
+        //- script(src="/js/vendor/vizd3js-bundle.js")
+        //- Include your custom visualization script
+        
+        script(src="/js/vendor/vizd3js-bundle.js")
+        script(type="module" src="/js/visualization.js")
+  
         h2 Name: #{proteinName}
         if success
             p Sequence: 
@@ -39,5 +48,4 @@ block content
         h3 Protein Viewer
         #structureViewer
         button#updateButton Update Highlights
-
-    script(src="/bundle.js")
+    
