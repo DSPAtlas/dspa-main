@@ -5,6 +5,7 @@
 //const $3Dmol = window['3Dmol'];
 //-import 'jquery';
 //-import $3Dmol from '../3Dmol-min.js';
+import * as d3 from 'd3';
 
 import {plotDynamicBarcode, plotResidueLevelBarcode} from "./barcode.js";
 import {prepareData} from "./utils.js";
@@ -16,5 +17,6 @@ const vizd3js = {
     plotResidueLevelBarcode,
     loadAndDisplayProteinStructure
 }
+//window.vizd3js = vizd3js;
 
-export { vizd3js };
+export default { vizd3js };

@@ -1,5 +1,6 @@
+//import * as d3 from "../d3.v4.js";
+//
 import * as d3 from 'd3';
-//import * as d3 from 'd3';
 
 export function highlightSequence(index, sequence, htmlid="#sequenceDisplay") {
     /**
