@@ -4,7 +4,7 @@
 // Access the global variable defined by the UMD module
 //const $3Dmol = window['3Dmol'];
 //-import 'jquery';
-import '$3Dmol';
+//-import $3Dmol from '../3Dmol-min.js';
 
 import {plotDynamicBarcode, plotResidueLevelBarcode} from "./barcode.js";
 import {prepareData} from "./utils.js";
