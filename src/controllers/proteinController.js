@@ -38,7 +38,6 @@ export const searchProteins = async (req, res) => {
         proteinName: result.proteinName, // or whichever property has the name
         proteinSequence: result.proteinSequence || "No sequence found",
         differentialAbundanceData: JSON.stringify(result.differentialAbundanceData)
-        //residueLevelPlot: result.residueLevelPlot, // Assuming this is the name used in the result object
       });
       } else {
       // Handle case when no results are found
