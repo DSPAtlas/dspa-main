@@ -2,11 +2,12 @@
   "name": "@dspa/vizd3js",
   "version": "1.0.0",
   "description": "Visualization library for the DSPA atlas in JavaScript",
-  "main": "src/main.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src --out-dir lib"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "3dmol": "^2.1.0",
     "d3": "^7.9.0"
   }
 }

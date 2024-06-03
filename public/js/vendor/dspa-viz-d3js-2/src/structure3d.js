@@ -1,7 +1,4 @@
-//import * as $3Dmol from '3dmol/build/3Dmol.js';
-//import '../3Dmol-min.js';
-//import '../jquery36.js';
-
+import * as $3Dmol from '../node_modules/3dmol/build/3dmol.ui.js';
 
 export async function loadAndDisplayProteinStructure(containerId, pdbUri, indicesList) {
     let element = document.querySelector(containerId);
@@ -12,7 +9,7 @@ export async function loadAndDisplayProteinStructure(containerId, pdbUri, indice
     }
 
     let config = { backgroundColor: 'white' };
-    let viewer = window.$3Dmol.createViewer(element, config);
+    let viewer = $3Dmol.createViewer(element, config);
 
     jQuery.ajax(pdbUri, {
         success: function(data) {

@@ -1,7 +1,4 @@
-//import {vizd3js} from "./vendor/dspa-viz-d3js-2/src/main.js";
-//import vizd3js from "@dspa/vizd3js";
-//const { prepareData, plotDynamicBarcode, plotResidueLevelBarcode, loadAndDisplayProteinStructure } = window.vizd3js;
-//import {vizd3js} from './vendor/dspa-viz-d3js-2/public/js/vendor/vizd3js-bundle.js';
+import { vizd3js } from "./vendor/dspa-viz-d3js-2/lib/index.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     // Get the JSON data from the script element and parse it
@@ -32,10 +29,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // Call the function to plot the data
     if (differentialAbundanceData.length > 0) {
         console.log('vizd3js object:', vizd3js);
-        window.vizd3js.plotResidueLevelBarcode(differentialAbundanceData, proteinSequence, residueHtmlid);
-        window.vizd3js.plotDynamicBarcode(differentialAbundanceData, dynamicHtmlid);
+        vizd3js.plotResidueLevelBarcode(differentialAbundanceData, proteinSequence, residueHtmlid);
+        vizd3js.plotDynamicBarcode(differentialAbundanceData, dynamicHtmlid);
     }
-    loadAndDisplayProteinStructure(structureHtmlid, "./data/AF-P00925-F1-model_v4.pdb", indicesWithScore);
+    vizd3js.loadAndDisplayProteinStructure(structureHtmlid, "./data/AF-P00925-F1-model_v4.pdb", indicesWithScore);
   });
 
 

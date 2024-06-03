@@ -1,14 +1,5 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.highlightSequence = highlightSequence;
-exports.removeHighlight = removeHighlight;
-//import * as d3 from "../d3.v4.js";
-//import * as d3 from 'd3';
-
-function highlightSequence(index, sequence) {
+import * as d3 from '../node_modules/d3/dist/d3.min.js';
+export function highlightSequence(index, sequence) {
   var htmlid = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "#sequenceDisplay";
   /**
    * Highlight Protein Sequence when hovering over barcode
@@ -37,7 +28,7 @@ function highlightSequence(index, sequence) {
   .attr("y", yPosition).text(sequence[index]).attr("font-family", "monospace").attr("font-size", "15px").attr("fill", "black") // Text color
   .attr("class", "highlight-text");
 }
-function removeHighlight() {
+export function removeHighlight() {
   /**
    * remove highlight
    */

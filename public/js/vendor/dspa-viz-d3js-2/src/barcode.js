@@ -1,6 +1,6 @@
-//import * as d3 from "../d3.v4.js";
+
 import {highlightSequence} from "./sequencedisplay.js";
-//import * as d3 from 'd3';
+;
 
 export function plotDynamicBarcode(data, htmlid = "svg#dynamicbarcodePlot"){
     /**

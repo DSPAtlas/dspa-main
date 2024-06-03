@@ -30,38 +30,6 @@ export const extractProteinAccession = (proteinName) => {
   }
 };
 
-export const getBarPlotsFromPythonScript = (data) => {
-  return new Promise((resolve, reject) => {
-    const pythonProcess = spawn('python', ['src/python/generate_plot.py']);
-
-    let svgData = '';
-    let errorData = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      svgData += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorData += data.toString(); // Accumulate error data
-    });
-
-    console.log(errorData)
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(svgData);
-      } else {
-        console.error(`Python script exited with code ${code}`);
-        console.error(`stderr: ${errorData}`); // Log all accumulated error data
-        reject(`Python script exited with code ${code}, stderr: ${errorData}`);
-      }
-    });
-
-    // Send the data to the Python script
-    pythonProcess.stdin.write(JSON.stringify(data));
-    pythonProcess.stdin.end();
-  });
-};
-
 export const findProteinByOrganismAndName = async(taxonomyID, proteinName) => {
   try {
     const query = `SELECT seq, protein_name, protein_description FROM organism_proteome_entries WHERE taxonomy_id = ? AND protein_name LIKE ?`;

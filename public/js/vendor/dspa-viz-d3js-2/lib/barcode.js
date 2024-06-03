@@ -1,16 +1,6 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.plotDynamicBarcode = plotDynamicBarcode;
-exports.plotResidueLevelBarcode = plotResidueLevelBarcode;
-var _sequencedisplay = require("./sequencedisplay.js");
-//import * as d3 from "../d3.v4.js";
-
-//import * as d3 from 'd3';
-
-function plotDynamicBarcode(data) {
+import { highlightSequence } from "./sequencedisplay.js";
+;
+export function plotDynamicBarcode(data) {
   var htmlid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "svg#dynamicbarcodePlot";
   /**
    * Dynamic Barcode
@@ -75,7 +65,7 @@ function plotDynamicBarcode(data) {
     d3.select(this).attr("stroke", "none"); // Remove highlight
   });
 }
-function plotResidueLevelBarcode(data, proteinSequence) {
+export function plotResidueLevelBarcode(data, proteinSequence) {
   var htmlid = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "svg#residuelevelPlot";
   /**
    * ResidueLevel Plot
@@ -111,7 +101,7 @@ function plotResidueLevelBarcode(data, proteinSequence) {
   }).attr("width", Math.max(1, width / data.length)).attr("height", height).attr("fill", function (d) {
     return isNaN(d.score) ? "silver" : colorScale(d.score);
   }).on("mouseover", function (event, d) {
-    return (0, _sequencedisplay.highlightSequence)(d.index, proteinSequence);
+    return highlightSequence(d.index, proteinSequence);
   }).on("mouseout", function () {
     d3.select("#tooltip").remove();
     d3.select(this).attr("stroke", "none"); // Remove highlight
