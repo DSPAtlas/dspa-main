@@ -35,9 +35,10 @@ export const searchProteins = async (req, res) => {
     if (result) {
       res.render('proteinView', {
         success: true,
-        proteinName: result.proteinName, // or whichever property has the name
+        proteinName: result.proteinName, 
         proteinSequence: result.proteinSequence || "No sequence found",
-        differentialAbundanceData: JSON.stringify(result.differentialAbundanceData)
+        differentialAbundanceData: JSON.stringify(result.differentialAbundanceData),
+        proteinStructure: result.proteinStructure
       });
       } else {
       // Handle case when no results are found

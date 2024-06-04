@@ -6,6 +6,7 @@ import debug from 'debug';
 
 import homeRoutes from './src/routes/homeRoutes.js';
 import proteinRoutes from './src/routes/proteinRoutes.js';
+import structureRoutes from './src/routes/structureRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -34,6 +35,7 @@ if (app.get('env') === 'development') {
 
 app.use('/', homeRoutes); // Use the home routes for the root URL
 app.use('/api/v1/proteins', proteinRoutes);
+app.use('/proteinstruct', structureRoutes);
 
 app.get('/search', (req, res) => {
     const { taxonomyID, proteinName } = req.query;
