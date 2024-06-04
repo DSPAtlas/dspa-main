@@ -19,10 +19,13 @@ block content
         //- Include d3.js from a CDN
         //- script(src="/js/vendor/dspa-viz-d3js-2/d3v6.js")
         
+        script(src="/js/vendor/dspa-viz-d3js-2/jquery36.js")
+        script(src="/js/vendor/dspa-viz-d3js-2/node_modules/3dmol/build/3Dmol-min.js")
         script(src="/js/vendor/vizd3js-bundle.js")
+        div#proteinData(data-protein-name=proteinName style="display:none;")
         script(type="module" src="/js/visualization.js")
   
-        h2 Name: #{proteinName}
+        h2(id="proteinName" data-name="#{proteinName}") Name: #{proteinName}
         if success
             p Sequence: 
                 pre.sequence #{proteinSequence}
@@ -43,6 +46,7 @@ block content
         else
             p No sequence found
         h3 Protein Viewer
+        #gldiv(style='width: 800px; height: 400px; position: relative;')
         #structureViewer
         button#updateButton Update Highlights
     
