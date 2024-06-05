@@ -1,52 +1,62 @@
 extends layout
 
 block content
-    nav.navbar
+    .search-container
         //- Form for selecting taxonomy ID
         form(action="/search" method="get")
-        //- Input for taxonomyID (using dropdown or radio buttons)
-        select(name="taxonomyID")
-            option(value="10090") Mus musculus
+            select(name="taxonomyID")
+                option(value="10090") Mus musculus
                 option(value="559292" selected) Saccharomyces cerevisiae S288C
                 option(value="9606") Homo Sapiens
-        //- Input for proteinName
-        input(type="text" name="proteinName" required placeholder="Enter protein name...")
-        //- Submission button
-        button(type="submit") Search
+            input(type="text" name="proteinName" required placeholder="Enter protein name...")
+            button(type="submit") Search
+    
+    h1(id="proteinName" data-name="#{proteinName}") Protein #{proteinName}
     
     .protein-info-container
-        h1 Protein Information
-        //- Include d3.js from a CDN
-        //- script(src="/js/vendor/dspa-viz-d3js-2/d3v6.js")
-        
         script(src="/js/vendor/dspa-viz-d3js-2/jquery36.js")
         script(src="/js/vendor/dspa-viz-d3js-2/node_modules/3dmol/build/3Dmol-min.js")
         script(src="/js/vendor/vizd3js-bundle.js")
         div#proteinData(data-protein-name=proteinName style="display:none;")
         script(type="module" src="/js/visualization.js")
   
-        h2(id="proteinName" data-name="#{proteinName}") Name: #{proteinName}
-        if success
-            p Sequence: 
-                pre.sequence #{proteinSequence}
+        .sequence-container  
+            if success 
+                h3 Sequence
+                    pre.sequence #{proteinSequence}
+                       //- .plot-container
+            else
+                p No sequence found
             if differentialAbundanceData && differentialAbundanceData.length > 0
-                h3 Residue Level Plot
-                span.info-button 
-                    | ?
-                    span.tooltip Text for residue level plot info here.
+                .heading-container
+                    h3 Residue Level Plot
+                    span.info-button 
+                        | ?
+                        span.tooltip Text for residue level plot info here.
                 .plot-container
-                    svg#residuelevelPlot(width="800", height="200")
-                h3 Dynamics Plot
+                    svg#residuelevelPlot(width="550", height="100")
+                .heading-container
+                    h3 Dynamics Plot
+                    span.info-button 
+                        | ?
+                        span.tooltip Text for residue level plot info here.
                 .plot-container
-                    svg#dynamicPlot(width="800", height="200")
+                    svg#dynamicPlot(width="550", height="100")
                 script(type="application/json" id="differentialAbundanceData")!= differentialAbundanceData
                 script(type="text/plain" id="proteinSequence") #{proteinSequence}
             else
                 p No residue level plot available.
-        else
-            p No sequence found
-        h3 Protein Viewer
-        #gldiv(style='width: 800px; height: 400px; position: relative;')
-        #structureViewer
-        button#updateButton Update Highlights
+           
+        .viewer-container
+            if success
+                h3 Structure
+                #gldiv 
+                button#viewFunction1(type="button") Placeholder
+                button#viewFunction2(type="button") Show Residues
+                button#viewFunction3(type="button") Show Labels
+            //-#structureViewer
+            //-button#updateButton Update Highlight
+
+        
+        
     

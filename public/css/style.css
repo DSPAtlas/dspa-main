@@ -51,7 +51,6 @@ h1 {
   margin: 20px 0;
   text-align: center;
   color: #748E6C;
-
 }
 
 p, pre {
@@ -63,7 +62,6 @@ p, pre {
     word-break: break-word; /* Ensures long words can be broken and wrapped */
     overflow-wrap: break-word; /* Alternative to word-break in some cases */
 }
-
 
 /* Basic Reset */
 * {
@@ -239,27 +237,50 @@ input[type="submit"]:hover, button:hover {
 }
 
 .protein-info-container {
-  width: 80%;
-  margin: 0 auto; /* This centers the div */
-  padding: 20px; /* Adds some padding inside the container */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for depth */
-  background-color: #fff; /* Sets a white background */
-  border-radius: 8px; /* Optional: Rounds the corners */
+  display: flex;
+  justify-content: space-between; /* Align children elements (divs) to opposite ends */
+  align-items: start; /* Align items to start from the top */
+  padding: 20px; /* Padding around the content for some spacing */
+  height: 100vh; 
+}
+
+.sequence-container {
+  width: 40%; /* Takes up 40% of the container width */
+  padding-right: 20px; /* Spacing between this container and the viewer */
+}
+
+.viewer-container {
+  width: 60%; /* Takes up 60% of the container width */
+}
+
+/* Styling for the 3D viewer element */
+#gldiv {
+  width: 100%; /* Full width of its container */
+  height: 400px; /* Set height */
+  background-color: #f0f0f0; /* Light grey background to distinguish the area */
+  border: 1px solid #ccc; /* Border to define edges */
+  position: relative; /* Allows absolute positioning inside */
+}
+
+/* Styling for buttons, aligned next to the viewer on the right */
+.viewer-container button {
+  display: block;
+  padding: 5px 10px; /* Reduced padding for a smaller button */
+  margin-top: 10px; /* Reduced margin-top for less spacing above the button */
+  border: 1px solid #ccc; /* Neutral grey border color */
+  border-radius: 15px; /* Smaller border-radius for a subtler rounded effect */
+  background: #f0f0f0; /* Light grey background for a neutral look */
+  color: #333; /* Dark grey text for better readability and neutral tone */
+  text-decoration: none;
+  font-size: 0.75rem; /* Smaller font size */
+  transition: background-color 0.3s ease;
 }
 
 /* Plot styling */
-.plot-container {
-  text-align: center;
-  margin: 20px 0; /* Add margin to plots */
-  overflow: auto;
-}
-
 .plot-container svg {
-  max-width: 100%;
+  width: 100%;
   height: auto;
-  display: block;
 }
-
 
 svg {
   display: block;
@@ -267,7 +288,6 @@ svg {
   height: auto;
   overflow: visible;
 }
-
 
 .info-button {
   display: inline-block;
@@ -305,4 +325,68 @@ svg {
 .info-button:hover .tooltip {
   visibility: visible;
   opacity: 1;
+}
+
+#proteinName {
+  text-align: left; 
+  margin-left: 60px;
+}
+#residueLevelPlot {
+  width: 800px; /* Fixed width as previously defined inline */
+  height: 200px; 
+}
+
+#dynamicPlot {
+  width: 800px; /* Fixed width as previously defined inline */
+  height: 200px; /* Fixed height as previously defined inline */
+}
+
+.heading-container {
+  display: flex;   /* Enables flexbox layout */
+  align-items: center;  /* Vertically centers the items in the container */
+  justify-content: space-between;  /* Spreads the items to fill the horizontal space */
+}
+
+.info-button {
+  margin-left: 10px;  /* Adds some space between the heading and the info button */
+  cursor: pointer;  /* Changes the cursor to indicate it's clickable */
+}
+
+.tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+.info-button:hover .tooltip {
+  visibility: visible;  /* Shows the tooltip when hovering over the info button */
+}
+
+.navbar {
+  background-color: #f8f9fa; /* light background for the navbar */
+  padding: 10px 20px; /* Padding around the navbar */
+}
+
+.search-form {
+  display: flex; /* Enables flexbox */
+  align-items: center; /* Vertically centers the items in the form */
+  width: 100%; /* Ensures the form takes full width of its container */
+}
+
+
+.search-form button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+.search-form input {
+  flex-grow: 1; /* Allows the input field to take up extra space */
 }
