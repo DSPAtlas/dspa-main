@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { getProteinFeatures } from '../models/proteinModel.js';
+import { getProteinFeatures, getBarcodesequence } from '../models/proteinModel.js';
 //import { findByProteinAccessions, executePythonVisualization} from '../models/differentialAbundance.js';
 
 // Define Joi validation schema for the query parameters
@@ -28,25 +28,29 @@ export const searchProteins = async (req, res) => {
 
     // Fetch protein features, which includes sequence data and plots
     const result = await getProteinFeatures(taxonomyID, proteinName);
+    const barcodesequence = getBarcodesequence(result.differentialAbundanceData);
 
     console.log(JSON.stringify(result.differentialAbundanceData))
+    console.log(barcodesequence)
 
     // Check if result is not empty
     if (result) {
-      res.render('proteinView', {
+      res.render('proteinViewNightingale', {
         success: true,
         proteinName: result.proteinName, 
         proteinSequence: result.proteinSequence || "No sequence found",
         differentialAbundanceData: JSON.stringify(result.differentialAbundanceData),
-        proteinStructure: result.proteinStructure
+        proteinStructure: result.proteinStructure,
+        barcodesequence: barcodesequence
       });
       } else {
       // Handle case when no results are found
-      res.render('proteinView', {
+      res.render('proteinViewNightingale', {
         success: false,
         proteinName: '',
         proteinSequence: "No sequence found",
-        differentialAbundanceData: JSON.stringify([])
+        differentialAbundanceData: JSON.stringify([]),
+        barcodesequence: ""
       });
     }
 

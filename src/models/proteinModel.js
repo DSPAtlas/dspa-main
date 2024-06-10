@@ -7,6 +7,35 @@ import { spawn } from 'child_process';
 // data validation
 // abstraction
 
+import fetch from 'node-fetch';
+
+export const getUniprotData = async (accession) => {
+    const url = `https://www.ebi.ac.uk/proteins/api/features/${accession}`;
+    const response = await fetch(url);
+    return response.json();
+};
+
+export const getBarcodesequence = async (data) => {
+  let result = "";
+
+  for (let d of data) {
+      let character;
+
+      if (d.sig !== null && d.sig !== 0) {
+          character = 'S';
+      } else if (d.detected !== null && d.detected !== 0) {
+          character = 'D';
+      } else {
+          character = 'I';
+      }
+
+      result += character;
+  }
+
+  return result;
+}
+
+
 export const getDifferentialAbundanceByAccession = async (pgProteinAccessions) => {
   try {
       const [rows] = await db.query(`
@@ -39,6 +68,8 @@ export const findProteinByOrganismAndName = async(taxonomyID, proteinName) => {
     throw error; // Propagate the error
   }
 };
+
+
 
 export function prepareData(jsonData, proteinSequence) {
   /**

@@ -2,7 +2,6 @@ extends layout
 
 block content
     .search-container
-        //- Form for selecting taxonomy ID
         form(action="/search" method="get")
             select(name="taxonomyID")
                 option(value="10090") Mus musculus
@@ -54,9 +53,6 @@ block content
                 button#viewFunction1(type="button") Placeholder
                 button#viewFunction2(type="button") Show Residues
                 button#viewFunction3(type="button") Show Labels
-            //-#structureViewer
-            //-button#updateButton Update Highlight
-
         
         
     

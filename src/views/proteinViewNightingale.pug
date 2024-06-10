@@ -1,0 +1,36 @@
+doctype html
+html
+  head
+    title Protein Visualization
+    script(type='module', src='/js/nightingale.js')
+  body
+    block content
+      nightingale-manager
+        table
+          tbody
+            tr
+              td
+              td
+                nightingale-navigation#navigation(min-width='800', height='40', length='770', display-begin='1', display-end='770', margin-color='white')
+            tr
+              td
+              td
+                nightingale-sequence#sequence(min-width='800', 
+                    height='40', length='770', 
+                    display-begin='1', display-end='770', 
+                    margin-color='white', 
+                    highlight-event='onmouseover')
+            tr
+              td
+              td
+                nightingale-colored-sequence#colored-sequence(
+                    min-width='800', 
+                    height='15', 
+                    length='770', 
+                    display-begin='1', 
+                    display-end='770', 
+                    highlight='20:200', 
+                    scale='T:-2,R:-2,Y:-2,F:2,A:2,I:2,L:2', 
+                    margin-color='white', 
+                    highlight-event='onmouseover')
+            // Additional rows follow the same pattern
