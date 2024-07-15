@@ -1,0 +1,1 @@
+gcloud run deploy dspa-service --image gcr.io/dspa-429113/dspa --add-cloudsql-instances=dspa-429113:europe-west6:dspasampledatabase --update-env-vars DB_HOST=127.0.0.1,DB_USER=root,DB_PASSWORD=dspadatabase,DB_NAME=dspasample --region=europe-west6 --platform managed

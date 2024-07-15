@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+public/js/temp_db/
+public/temp_db/
+src/routes/temp_db/

@@ -1,7 +1,0 @@
-{
-  "presets": [
-    ["@babel/preset-env", {
-      "modules": false // Prevent Babel from transforming ES6 modules to CommonJS
-    }]
-  ]
-}
