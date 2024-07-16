@@ -21,7 +21,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 // Serve the static files from the React app
@@ -32,7 +32,7 @@ app.use(helmet({
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https://alphafold.ebi.ac.uk"],
         connectSrc: ["'self'", "https://alphafold.ebi.ac.uk"],
         fontSrc: ["'self'"],
