@@ -1,0 +1,6 @@
+[submodule "dspa-backend"]
+	path = dspa-backend
+	url = https://github.com/DSPAtlas/dspa-backend
+[submodule "dspa-frontend"]
+	path = dspa-frontend
+	url = https://github.com/DSPAtlas/dspa-frontend
