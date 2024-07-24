@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 import homeRoutes from './dspa-backend/routes/homeRoutes.js';
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
+import allExperimentsRoutes from './dspa-backend/routes/allExperimentsRoutes.js';
 import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
@@ -34,10 +35,11 @@ app.use(helmet({
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https://alphafold.ebi.ac.uk"],
-        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk"],
-        fontSrc: ["'self'"],
+        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080","http://localhost:3000", "http://localhost:8080","https://rest.uniprot.org", "https://www.ebi.ac.uk"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
+        workerSrc: ["'self'", "blob:"]
       },
     },
   }));
@@ -53,7 +55,8 @@ app.use(cors());
 
 app.use('/', homeRoutes); 
 app.use('/api/v1/proteins', proteinRoutes);
-app.use('/api/v1/experiments', experimentRoutes);
+app.use('/api/v1/experiments', allExperimentsRoutes);
+app.use('/api/v1/experiment', experimentRoutes);
 app.use('/api/v1/search', searchRoutes);
 
 app.get('*', (req, res) => {

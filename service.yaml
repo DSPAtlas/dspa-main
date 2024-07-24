@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: dspa-service
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cloudsql-instances: dspa-429113:europe-west6:dspasampledatabase
+    spec:
+      containers:
+        - image: dspa-image
+          env:
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASS
+              value: "dspadatabase"
+            - name: DB_NAME
+              value: "dspasample"
+          ports:
+            - containerPort: 8080
