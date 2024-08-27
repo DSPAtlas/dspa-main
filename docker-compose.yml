@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=localhost
+      - DB_USER=postgres
+      - DB_PASSWORD=dspa
+      - DB_NAME=dspasample
+      - DB_PORT=3306
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0  # Use the latest version of MySQL 8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: dspa
+      MYSQL_DATABASE: dspasample
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

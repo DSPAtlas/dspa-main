@@ -1,29 +1,23 @@
-# Use the official Node.js image
-FROM node:14
+# Use the official Node.js image from Docker Hub as the base image
+FROM node:18
 
-# Create and change to the app directory
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy application dependency manifests to the container image
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install production dependencies
+# Install backend dependencies
 RUN npm install
 
-# Copy local code to the container image
+# Copy the rest of the application files to the working directory
 COPY . .
 
+# Build the frontend React app
+RUN npm run build --prefix dspa-frontend
 
-RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
-RUN chmod +x cloud_sql_proxy
-
+# Expose the port that your app runs on
 EXPOSE 8080
 
-# Run the Cloud SQL Auth proxy
-# Replace INSTANCE_CONNECTION_NAME with your instance's connection name
-
-CMD ./cloud_sql_proxy -instances=dspa-429113:europe-west6:dspasampledatabase=tcp:3306 & npm start
-
-# Expose the port on which your app runs
-
-
+# Start the application
+CMD ["node", "index.mjs"]
