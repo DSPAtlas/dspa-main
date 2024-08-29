@@ -1,10 +1,11 @@
-version: '3.8'
 
 services:
   app:
     build: .
+    command: ["node", "index.mjs"]
     ports:
       - "8080:8080"
+    restart: always
     environment:
       - PORT=8080
       - NODE_ENV=production

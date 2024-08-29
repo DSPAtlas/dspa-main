@@ -3,3 +3,4 @@ node_modules/
 public/js/temp_db/
 public/temp_db/
 src/routes/temp_db/
+dspasample_dump.sql
