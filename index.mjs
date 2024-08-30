@@ -35,7 +35,7 @@ app.use(helmet({
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https://alphafold.ebi.ac.uk"],
-        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080","http://localhost:3000", "http://localhost:8080","https://rest.uniprot.org", "https://www.ebi.ac.uk"],
+        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080","https://localhost:3000", "https://localhost:8080","https://rest.uniprot.org", "https://www.ebi.ac.uk"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
