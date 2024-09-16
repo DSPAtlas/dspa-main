@@ -1,4 +1,3 @@
-
 import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
@@ -7,6 +6,8 @@ import debug from 'debug';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import https from 'https';
 
 import homeRoutes from './dspa-backend/routes/homeRoutes.js';
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
@@ -24,10 +25,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// SSL Options
+const sslOptions = {
+  key: fs.readFileSync('/usr/src/app/ssl/server.key'),
+  cert: fs.readFileSync('/usr/src/app/ssl/server.crt'),
+};
+
+// Middlewares
 app.use(express.json());
+
 // Serve the static files from the React app
 const frontendPath = path.join(__dirname, 'dspa-frontend/build');
 app.use(express.static(frontendPath));
+
 app.use(helmet({
     contentSecurityPolicy: {
       directives: {
@@ -35,7 +45,7 @@ app.use(helmet({
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https://alphafold.ebi.ac.uk"],
-        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080","https://localhost:3000", "https://localhost:8080","https://rest.uniprot.org", "https://www.ebi.ac.uk"],
+        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080", "https://rest.uniprot.org", "https://www.ebi.ac.uk"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
@@ -48,25 +58,26 @@ console.log('Environment:', app.get('env'));
 
 if (app.get('env') === 'development') {
     app.use(morgan('tiny'));
-    debug('app:startup')('Morgan enabled...');
+    startupDebugger('Morgan enabled...');
 }
 
 app.use(cors());
 
+// API routes
 app.use('/', homeRoutes); 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment', experimentRoutes);
 app.use('/api/v1/search', searchRoutes);
 
+// Catch-all route for React frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/dspa-frontend/build', 'index.html'));
 });
 
-
 dbDebugger('Connected to the database...');
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+// HTTPS server
+https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
+    console.log(`HTTPS Server is running on port ${PORT}`);
 });
-

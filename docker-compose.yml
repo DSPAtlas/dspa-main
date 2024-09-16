@@ -1,7 +1,11 @@
 
 services:
   app:
-    build: .
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: elenakrismer/dspa-main-app:latest
     command: ["node", "index.mjs"]
     ports:
       - "8080:8080"
@@ -17,6 +21,8 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+      - ./server.crt:/usr/src/app/ssl/server.crt  
+      - ./server.key:/usr/src/app/ssl/server.key 
     depends_on:
       - mysql
 
