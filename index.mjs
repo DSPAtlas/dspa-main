@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import https from 'https';
 
+import groupRoutes from './dspa-backend/routes/groupRoutes.js';
 import homeRoutes from './dspa-backend/routes/homeRoutes.js';
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
@@ -26,10 +27,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // SSL Options
-const sslOptions = {
-  key: fs.readFileSync('/usr/src/app/ssl/server.key'),
-  cert: fs.readFileSync('/usr/src/app/ssl/server.crt'),
-};
+
 
 // Middlewares
 app.use(express.json());
@@ -45,7 +43,7 @@ app.use(helmet({
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https://alphafold.ebi.ac.uk"],
-        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "https://localhost:3000",  "https://localhost:8080", "https://rest.uniprot.org", "https://www.ebi.ac.uk"],
+        connectSrc: ["'self'", "https://alphafold.ebi.ac.uk", "http://localhost:3000",  "http://localhost:8080", "https://localhost:8081","https://rest.uniprot.org", "https://www.ebi.ac.uk"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
@@ -69,6 +67,7 @@ app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment', experimentRoutes);
 app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1/group', groupRoutes);
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
@@ -77,7 +76,12 @@ app.get('*', (req, res) => {
 
 dbDebugger('Connected to the database...');
 
-// HTTPS server
-https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
-    console.log(`HTTPS Server is running on port ${PORT}`);
-});
+if (app.get('env') === 'development') {
+  app.listen(PORT, () => {
+      console.log(`HTTP Server is running on port ${PORT}`);
+  });
+} else {
+  https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
+      console.log(`HTTPS Server is running on port ${PORT}`);
+  });
+}
