@@ -12,10 +12,8 @@ RUN npm install
 
 # Copy the rest of the application files to the working directory
 COPY . .
-
-# Copy SSL certificates to the container
-COPY server.crt /usr/src/app/ssl/server.crt
-COPY server.key /usr/src/app/ssl/server.key
+COPY certs/nginx.key /usr/src/app/nginx.key
+COPY certs/nginx.crt /usr/src/app/nginx.crt
 
 # Build the frontend React app
 RUN npm run build --prefix dspa-frontend

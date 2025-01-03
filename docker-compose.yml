@@ -1,42 +1,37 @@
+version: '3.8'
 
 services:
   app:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: elenakrismer/dspa-main-app:latest
     command: ["node", "index.mjs"]
     ports:
-      - "8080:8080"
-    restart: always
+      - "80:8080"
     environment:
       - PORT=8080
-      - NODE_ENV=development
+      - NODE_ENV=production
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASSWORD=dspa
-      - DB_NAME=dspasample
+      - DB_NAME=dynaprotdb
       - DB_PORT=3306
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-      - ./server.crt:/usr/src/app/ssl/server.crt  
-      - ./server.key:/usr/src/app/ssl/server.key 
     depends_on:
       - mysql
+    volumes:
+      - ./certs/nginx.key:/usr/src/app/nginx.key
+      - ./certs/nginx.crt:/usr/src/app/nginx.crt
+    
 
   mysql:
     image: mysql:8.0 
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: dspa
-      MYSQL_DATABASE: dspasample
+      MYSQL_DATABASE: dynaprotdb
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./dspasample_dump.sql:/docker-entrypoint-initdb.d/dspasample_dump.sql
+      - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
 
 volumes:
   mysql-data:
