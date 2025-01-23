@@ -5,7 +5,7 @@ services:
     image: elenakrismer/dspa-main-app:latest
     command: ["node", "index.mjs"]
     ports:
-      - "80:8080"
+      - "443:8080"
     environment:
       - PORT=8080
       - NODE_ENV=production
@@ -19,7 +19,6 @@ services:
     volumes:
       - ./certs/nginx.key:/usr/src/app/nginx.key
       - ./certs/nginx.crt:/usr/src/app/nginx.crt
-    
 
   mysql:
     image: mysql:8.0 
@@ -30,6 +29,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./my.cnf:/etc/mysql/conf.d/custom.cnf
       - mysql-data:/var/lib/mysql
       - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
 

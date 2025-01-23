@@ -9,14 +9,12 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import https from 'https';
 
-import groupRoutes from './dspa-backend/routes/groupRoutes.js';
-import homeRoutes from './dspa-backend/routes/homeRoutes.js';
+
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
 import allExperimentsRoutes from './dspa-backend/routes/allExperimentsRoutes.js';
 import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
 import treatmentRoutes from './dspa-backend/routes/treatmentRoutes.js';
-import pathwayRoutes from './dspa-backend/routes/pathwayRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -68,16 +66,12 @@ if (app.get('env') === 'development') {
 
 app.use(cors());
 
-// API routes
-app.use('/', homeRoutes); 
+//app.use('/', homeRoutes); 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment', experimentRoutes);
 app.use('/api/v1/search', searchRoutes);
-app.use('/api/v1/group', groupRoutes);
 app.use('/api/v1/treatment', treatmentRoutes);
-app.use('/api/v1/pathway', pathwayRoutes);
-
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
