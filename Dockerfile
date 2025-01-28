@@ -12,8 +12,6 @@ RUN npm install
 
 # Copy the rest of the application files to the working directory
 COPY . .
-COPY certs/nginx.key /usr/src/app/nginx.key
-COPY certs/nginx.crt /usr/src/app/nginx.crt
 
 # Build the frontend React app
 RUN npm run build --prefix dspa-frontend

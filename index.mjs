@@ -6,8 +6,6 @@ import debug from 'debug';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
-import https from 'https';
 
 
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
@@ -25,8 +23,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-// SSL Options
 
 
 // Middlewares
@@ -66,7 +62,6 @@ if (app.get('env') === 'development') {
 
 app.use(cors());
 
-//app.use('/', homeRoutes); 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment', experimentRoutes);
@@ -80,17 +75,7 @@ app.get('*', (req, res) => {
 
 dbDebugger('Connected to the database...');
 
-if (app.get('env') === 'development') {
-  app.listen(PORT, () => {
+app.listen(PORT, () => {
       console.log(`HTTP Server is running on port ${PORT}`);
   });
-} else {
-  const sslOptions = {
-    key: fs.readFileSync(path.join(__dirname, 'nginx.key')), // Path to your private key
-    cert: fs.readFileSync(path.join(__dirname, 'nginx.crt')), // Path to your certificate
-};
 
-  https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
-      console.log(`HTTPS Server is running on port ${PORT}`);
-  });
-}

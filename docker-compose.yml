@@ -1,37 +1,66 @@
 version: '3.8'
 
 services:
-  app:
+  webapp:
     image: elenakrismer/dspa-main-app:latest
-    command: ["node", "index.mjs"]
-    ports:
-      - "443:8080"
+    networks:
+      - webnet
+    depends_on:
+      - db
     environment:
+      - VIRTUAL_HOST=dynaprot.org,www.dynaprot.org
+      - LETSENCRYPT_HOST=dynaprot.org,www.dynaprot.org
+      - LETSENCRYPT_EMAIL=elena.krismer@gmail.com
       - PORT=8080
       - NODE_ENV=production
-      - DB_HOST=mysql
+      - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=dspa
       - DB_NAME=dynaprotdb
       - DB_PORT=3306
-    depends_on:
-      - mysql
-    volumes:
-      - ./certs/nginx.key:/usr/src/app/nginx.key
-      - ./certs/nginx.crt:/usr/src/app/nginx.crt
 
-  mysql:
-    image: mysql:8.0 
+
+  db:
+    image: mysql:8.0
     restart: always
+    networks:
+      - webnet
     environment:
       MYSQL_ROOT_PASSWORD: dspa
       MYSQL_DATABASE: dynaprotdb
-    ports:
-      - "3306:3306"
     volumes:
-      - ./my.cnf:/etc/mysql/conf.d/custom.cnf
       - mysql-data:/var/lib/mysql
       - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    networks:
+      - webnet
+
+  certbot:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - ./certs:/etc/nginx/certs:rw
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - nginx-proxy
+    networks:
+      - webnet
+    environment:
+      - NGINX_PROXY_CONTAINER=ekrismer-nginx-proxy-1 
+
+networks:
+  webnet:
 
 volumes:
   mysql-data:

@@ -21,7 +21,7 @@ sudo docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest
 Use Docker Compose to build and run the application. This will spin up the containers for both the frontend, backend, and the MySQL database.
 
 ```bash
-sudo docker-compose up --build -d
+sudo docker compose up --build -d
 ```
 
 ## Updating Docker Image
@@ -33,4 +33,26 @@ docker login
 docker buildx build --platform linux/arm64 -t elenakrismer/dspa-main-app:latest --push .
 
 docker buildx build --platform linux/amd64 -t elenakrismer/dspa-main-app:latest --push .
+```
+
+
+## Dumping the database
+
+Creating a database dump to upload it on the VM
+
+```bash
+mysqldump -u root -p dynaprotdb > dynaprotdb.sql
+
+```
+
+## Loading of database
+ 
+ The database dump is getting loaded by the dockercompose.yml however it can happen that it needs to be loaded manually into the docker container.
+
+
+```bash
+sudo docker exec -it ekrismer-db-1 bash
+mysql -u root -p
+USE dynaprotdb;
+SOURCE /docker-entrypoint-initdb.d/dynaprotdb.sql;
 ```
