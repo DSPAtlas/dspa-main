@@ -6,17 +6,13 @@ import debug from 'debug';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
-import https from 'https';
 
-import groupRoutes from './dspa-backend/routes/groupRoutes.js';
-import homeRoutes from './dspa-backend/routes/homeRoutes.js';
+
 import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
 import allExperimentsRoutes from './dspa-backend/routes/allExperimentsRoutes.js';
 import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
 import treatmentRoutes from './dspa-backend/routes/treatmentRoutes.js';
-import pathwayRoutes from './dspa-backend/routes/pathwayRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -27,8 +23,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-// SSL Options
 
 
 // Middlewares
@@ -68,16 +62,11 @@ if (app.get('env') === 'development') {
 
 app.use(cors());
 
-// API routes
-app.use('/', homeRoutes); 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment', experimentRoutes);
 app.use('/api/v1/search', searchRoutes);
-app.use('/api/v1/group', groupRoutes);
 app.use('/api/v1/treatment', treatmentRoutes);
-app.use('/api/v1/pathway', pathwayRoutes);
-
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
@@ -86,17 +75,7 @@ app.get('*', (req, res) => {
 
 dbDebugger('Connected to the database...');
 
-if (app.get('env') === 'development') {
-  app.listen(PORT, () => {
+app.listen(PORT, () => {
       console.log(`HTTP Server is running on port ${PORT}`);
   });
-} else {
-  const sslOptions = {
-    key: fs.readFileSync(path.join(__dirname, 'nginx.key')), // Path to your private key
-    cert: fs.readFileSync(path.join(__dirname, 'nginx.crt')), // Path to your certificate
-};
 
-  https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
-      console.log(`HTTPS Server is running on port ${PORT}`);
-  });
-}
