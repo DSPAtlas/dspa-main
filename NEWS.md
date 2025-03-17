@@ -1,3 +1,8 @@
+
+## release 0.1.1
+### Bug Fixes
+* Enhance Structure Viewer and updates
+
 ## release 0.1.0
 ### New features
 * TreatmentView:
