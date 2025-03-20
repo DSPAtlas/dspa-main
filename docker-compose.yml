@@ -18,6 +18,8 @@ services:
       - DB_PASSWORD=dspa
       - DB_NAME=dynaprotdb
       - DB_PORT=3306
+      - USERNAME_WEBSITE=
+      - PASSWORD_WEBSITE=
 
 
   db:

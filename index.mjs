@@ -28,10 +28,6 @@ const PORT = process.env.PORT || 8080;
 // Middlewares
 app.use(express.json());
 
-// Serve the static files from the React app
-const frontendPath = path.join(__dirname, 'dspa-frontend/build');
-app.use(express.static(frontendPath));
-
 app.use(helmet({
     contentSecurityPolicy: {
       directives: {
@@ -55,6 +51,11 @@ app.use(helmet({
 
 console.log('Environment:', app.get('env'));
 
+
+// Serve static files after authentication
+const frontendPath = path.join(__dirname, 'dspa-frontend/build');
+app.use(express.static(frontendPath));
+
 if (app.get('env') === 'development') {
     app.use(morgan('tiny'));
     startupDebugger('Morgan enabled...');
@@ -64,9 +65,9 @@ app.use(cors());
 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
-app.use('/api/v1/experiment', experimentRoutes);
-app.use('/api/v1/search', searchRoutes);
-app.use('/api/v1/treatment', treatmentRoutes);
+app.use('/api/v1/experiment',  experimentRoutes);
+app.use('/api/v1/search',  searchRoutes);
+app.use('/api/v1/treatment',  treatmentRoutes);
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
