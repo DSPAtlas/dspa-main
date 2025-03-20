@@ -1,3 +1,11 @@
+
+## release 0.2.0
+* add authentification
+
+## release 0.1.1
+### Bug Fixes
+* Enhance Structure Viewer and updates
+
 ## release 0.1.0
 ### New features
 * TreatmentView:
