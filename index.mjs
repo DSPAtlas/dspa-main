@@ -12,7 +12,8 @@ import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
 import allExperimentsRoutes from './dspa-backend/routes/allExperimentsRoutes.js';
 import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
-import treatmentRoutes from './dspa-backend/routes/treatmentRoutes.js';
+import conditionRoutes from './dspa-backend/routes/conditionRoutes.js';
+import doseResponseRoutes from './dspa-backend/routes/doseResponseRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -67,7 +68,8 @@ app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment',  experimentRoutes);
 app.use('/api/v1/search',  searchRoutes);
-app.use('/api/v1/treatment',  treatmentRoutes);
+app.use('/api/v1/condition',  conditionRoutes);
+app.use('/api/v1/doseresponse',  doseResponseRoutes);
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
