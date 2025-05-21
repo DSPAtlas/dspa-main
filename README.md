@@ -1,13 +1,28 @@
-# DSPA-main
-The DSPA application consists of a frontend built with React.js, a backend using Node.js, and a MySQL database. This setup is hosted in a Docker container running on a Linux VM. Below are the steps to pull the Docker image from Docker Hub, set up the database, and start the application.
+# DSPA-Main: Application Deployment Guide
+The DSPA application consists of a frontend built with React.js, a backend powered by Node.js, and a MySQL database. This setup is containerized using Docker and hosted on a Linux virtual machine (VM).
 
-Prerequisites
+This guide walks you through pulling the Docker image, setting up the database, running the application, and managing updates.
+
+## ✅ Prerequisites
 - Ensure Docker and Docker Compose are installed on your Linux VM.
 - Access to the Linux VM with appropriate permissions.
 - A local dump of the dsaa-database is available for importing.
 
 
-## Hosting
+## 🔄 Updating the Docker Image
+
+To update and push a new version of the Docker image:
+
+```bash
+docker login
+
+docker buildx build --platform linux/amd64 -t elenakrismer/dspa-main-app:latest --push .
+```
+This builds the image for the correct architecture and pushes it to Docker Hub.
+
+
+
+## 🚀 Hosting the DSPA Application
 The website is running in a Dockecontainer on our Linux VM. Pulling the docker image from dockerhub and having a local dsaa-database dumb.
 
 1. Pull the Latest Docker Image
@@ -17,24 +32,13 @@ First, pull the latest Docker image for the DSPA application from Docker Hub. Th
 ```bash
 sudo docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest
 ```
-2. Set up Docker
+2. Start the Application with Docker Compose
 Use Docker Compose to build and run the application. This will spin up the containers for both the frontend, backend, and the MySQL database.
 
 ```bash
 sudo docker compose up --build -d
 ```
-
-## Updating Docker Image
-
-
-```bash
-docker login
-
-docker buildx build --platform linux/arm64 -t elenakrismer/dspa-main-app:latest --push .
-
-docker buildx build --platform linux/amd64 -t elenakrismer/dspa-main-app:latest --push .
-```
-
+This command will start the containers in detached mode (-d).
 
 ## Dumping the database
 
@@ -45,14 +49,50 @@ mysqldump -u root -p dynaprotdb > dynaprotdb.sql
 
 ```
 
-## Loading of database
+## 💾 Creating a Database Dump
+
+To back up the local MySQL database before transferring or reloading:
  
- The database dump is getting loaded by the dockercompose.yml however it can happen that it needs to be loaded manually into the docker container.
-
-
 ```bash
-sudo docker exec -it ekrismer-db-1 bash
-mysql -u root -p
+mysqldump -u root -p dynaprotdb > dynaprotdb.sql
+
+```
+
+## 🗃️ Loading the Database into Docker
+
+Although docker-compose.yml can automatically load the SQL dump via:
+
+```yaml
+volumes:
+  - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
+```
+
+... you may occasionally need to load it manually:
+
+**Manual Import Steps**
+ Access the running MySQL container:
+ ```bash
+   sudo docker exec -it ekrismer-db-1 bash
+  ```
+Enter the MySQL CLI:
+ ```bash
+   mysql -u root -p
+  ```
+
+Load the SQL dump:
+ ```bash
 USE dynaprotdb;
 SOURCE /docker-entrypoint-initdb.d/dynaprotdb.sql;
 ```
+
+    
+
+# ✅ Summary
+
+| Task                   | Command or Step                                                        |
+| ---------------------- | ---------------------------------------------------------------------- |
+| Pull Docker image      | `docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest` |
+| Start containers       | `docker compose up --build -d`                                         |
+| Build & push new image | `docker buildx build --platform linux/amd64 -t ... --push .`           |
+
+
