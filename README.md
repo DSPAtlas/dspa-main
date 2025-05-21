@@ -94,5 +94,6 @@ SOURCE /docker-entrypoint-initdb.d/dynaprotdb.sql;
 | Pull Docker image      | `docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest` |
 | Start containers       | `docker compose up --build -d`                                         |
 | Build & push new image | `docker buildx build --platform linux/amd64 -t ... --push .`           |
+| Stop website/containers | `docker compose down`           |
 
 
