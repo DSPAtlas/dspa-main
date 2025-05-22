@@ -12,7 +12,8 @@ import proteinRoutes from './dspa-backend/routes/proteinRoutes.js';
 import searchRoutes from './dspa-backend/routes/searchRoutes.js';
 import allExperimentsRoutes from './dspa-backend/routes/allExperimentsRoutes.js';
 import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
-import treatmentRoutes from './dspa-backend/routes/treatmentRoutes.js';
+import conditionRoutes from './dspa-backend/routes/conditionRoutes.js';
+import doseResponseRoutes from './dspa-backend/routes/doseResponseRoutes.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -27,10 +28,6 @@ const PORT = process.env.PORT || 8080;
 
 // Middlewares
 app.use(express.json());
-
-// Serve the static files from the React app
-const frontendPath = path.join(__dirname, 'dspa-frontend/build');
-app.use(express.static(frontendPath));
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -55,6 +52,11 @@ app.use(helmet({
 
 console.log('Environment:', app.get('env'));
 
+
+// Serve static files after authentication
+const frontendPath = path.join(__dirname, 'dspa-frontend/build');
+app.use(express.static(frontendPath));
+
 if (app.get('env') === 'development') {
     app.use(morgan('tiny'));
     startupDebugger('Morgan enabled...');
@@ -64,9 +66,10 @@ app.use(cors());
 
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
-app.use('/api/v1/experiment', experimentRoutes);
-app.use('/api/v1/search', searchRoutes);
-app.use('/api/v1/treatment', treatmentRoutes);
+app.use('/api/v1/experiment',  experimentRoutes);
+app.use('/api/v1/search',  searchRoutes);
+app.use('/api/v1/condition',  conditionRoutes);
+app.use('/api/v1/doseresponse',  doseResponseRoutes);
 
 // Catch-all route for React frontend
 app.get('*', (req, res) => {
