@@ -16,7 +16,7 @@ To update and push a new version of the Docker image:
 ```bash
 docker login
 
-docker buildx build --platform linux/amd64 -t elenakrismer/dspa-main-app:latest --push .
+docker buildx build --platform linux/amd64 -t dynaprot/dspa-main-app:latest --push .
 ```
 This builds the image for the correct architecture and pushes it to Docker Hub.
 
@@ -30,7 +30,7 @@ The website is running in a Dockecontainer on our Linux VM. Pulling the docker i
 First, pull the latest Docker image for the DSPA application from Docker Hub. The --platform linux/amd64 flag ensures compatibility with the target architecture.
 
 ```bash
-sudo docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest
+sudo docker pull --platform linux/amd64 dynaprot/dspa-main-app:latest
 ```
 2. Start the Application with Docker Compose
 Use Docker Compose to build and run the application. This will spin up the containers for both the frontend, backend, and the MySQL database.
@@ -91,7 +91,7 @@ SOURCE /docker-entrypoint-initdb.d/dynaprotdb.sql;
 
 | Task                   | Command or Step                                                        |
 | ---------------------- | ---------------------------------------------------------------------- |
-| Pull Docker image      | `docker pull --platform linux/amd64 elenakrismer/dspa-main-app:latest` |
+| Pull Docker image      | `docker pull --platform linux/amd64 dynaprot/dspa-main-app:latest` |
 | Start containers       | `docker compose up --build -d`                                         |
 | Build & push new image | `docker buildx build --platform linux/amd64 -t ... --push .`           |
 | Stop website/containers | `docker compose down`           |
