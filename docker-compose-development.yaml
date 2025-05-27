@@ -1,0 +1,39 @@
+services:
+  webapp:
+    image: dynaprot/dspa-main-app:latest  
+    build:
+      context: . 
+    ports:
+      - "8080:8080"  
+    networks:
+      - webnet
+    depends_on:
+      - db
+    environment:
+      - PORT=8080
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_NAME=dynaprotdbv2
+      - DB_PORT=3306
+
+  db:
+    image: mysql:8.0
+    restart: always
+    networks:
+      - webnet
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: dynaprotdbv2
+    ports:
+      - "3307:3306"  # Access MySQL on localhost:3307
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
+
+networks:
+  webnet:
+
+volumes:
+  mysql-data:
