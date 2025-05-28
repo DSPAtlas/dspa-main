@@ -2,9 +2,6 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
-# Copy root package files first
-COPY package*.json ./
-
 COPY . .
 
 # Install backend dependencies
