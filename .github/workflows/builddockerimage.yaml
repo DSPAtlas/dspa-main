@@ -19,7 +19,7 @@ jobs:
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
       - name: Build the Docker Image
-        run: docker build -t dynaprot/dspa-main:latest .
+        run: docker buildx build --platform linux/amd64 -t dynaprot/dspa-main-app:latest --push .
 
       - name: Push to Docker Hub
         run: docker push dynaprot/dspa-main:latest
