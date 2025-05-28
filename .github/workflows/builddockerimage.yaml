@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive  
 
-      - name: Show frontend folder contents (debug)
+      - name: Show frontend folder contents
         run: ls -R dspa-frontend
 
       - name: Login to Docker Hub
@@ -23,6 +26,7 @@ jobs:
 
       - name: Build the Docker Image
         run: docker buildx build --platform linux/amd64 -t dynaprot/dspa-main-app:latest --push .
+
 
       - name: Push to Docker Hub
         run: docker push dynaprot/dspa-main:latest
