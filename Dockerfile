@@ -1,27 +1,32 @@
-# Use the official Node.js image from Docker Hub as the base image
 FROM node:20
 
-# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy root package files first
 COPY package*.json ./
 
-# Clone external Nightingale bundle repo BEFORE installing
-RUN mkdir -p dspa-frontend/external && \
-    git clone https://github.com/DSPAtlas/dspa-nightingale-bundle.git dspa-frontend/external/dspa-nightingale-bundle
+COPY . .
 
 # Install backend dependencies
 RUN npm install
 
-# Copy the rest of the application files to the working directory
-COPY . .
+# Install frontend dependencies
+RUN npm install --prefix dspa-frontend
 
-# Build the frontend React app
+# Clone external dependency into the path the frontend expects
+# Clone Nightingale bundle and copy built modules into node_modules
+RUN mkdir -p dspa-frontend/node_modules/@dspa-nightingale && \
+    git clone --depth 1 https://github.com/DSPAtlas/dspa-nightingale-bundle.git /tmp/nightingale && \
+    cp -r /tmp/nightingale/nightingale-sequence dspa-frontend/node_modules/@dspa-nightingale/nightingale-sequence && \
+    cp -r /tmp/nightingale/nightingale-structure dspa-frontend/node_modules/@dspa-nightingale/nightingale-structure && \
+    cp -r /tmp/nightingale/nightingale-track dspa-frontend/node_modules/@dspa-nightingale/nightingale-track
+
+
+# Build the frontend React app (now the folder exists)
 RUN npm run build --prefix dspa-frontend
 
-# Expose the port that your app runs on
+# Expose backend port
 EXPOSE 8080
 
-# Start the backend application
+# Start backend
 CMD ["node", "index.mjs"]
