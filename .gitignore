@@ -4,3 +4,10 @@ public/js/temp_db/
 public/temp_db/
 src/routes/temp_db/
 dspasample_dump.sql
+# symlinks
+dspa-backend
+dspa-frontend
+yarn.lock
+/server.log
+/dynaprotdb.sql
+
