@@ -53,8 +53,10 @@ mysqldump \
 
 # 6. Check the exit status of the mysqldump command to ensure it was successful
 if [ $? -eq 0 ]; then
-  echo "Backup successfully created: ${OUTPUT_FILE}"
+  echo "Backup successfully created: ${OUTPUT_FILE}, zipping"
   ls -l -h ${OUTPUT_FILE}
+  gzip ${OUTPUT_FILE}
+  ls -l -h ${OUTPUT_FILE}.gz
 else
   echo "Error: Database backup failed!" >&2
   exit 1
