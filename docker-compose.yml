@@ -7,14 +7,15 @@ services:
       - db
     environment:
       - VIRTUAL_HOST=dynaprot.org,www.dynaprot.org
+      - VIRTUAL_PORT=8080
       - LETSENCRYPT_HOST=dynaprot.org,www.dynaprot.org
       - LETSENCRYPT_EMAIL=dynaprot@imsb.biol.ethz.ch 
       - PORT=8080
       - NODE_ENV=production
       - DB_HOST=db
       - DB_USER=root
-      - DB_PASSWORD=
-      - DB_NAME=dynaprotdb
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
       - DB_PORT=3306
       - USERNAME_WEBSITE=
       - PASSWORD_WEBSITE=
@@ -24,12 +25,13 @@ services:
     networks:
       - webnet
     environment:
-      MYSQL_ROOT_PASSWORD: 
-      MYSQL_DATABASE: dynaprotdbv2
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      # This would create database as per this script if the volume is missing
       - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
 
   nginx-proxy:
@@ -61,6 +63,7 @@ services:
 
 networks:
   webnet:
+    external: true
 
 volumes:
   mysql-data:

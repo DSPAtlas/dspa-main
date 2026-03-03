@@ -14,8 +14,8 @@ services:
       - NODE_ENV=development
       - DB_HOST=db
       - DB_USER=root
-      - DB_PASSWORD=
-      - DB_NAME=dynaprotdbv2
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
       - DB_PORT=3306
 
   db:
@@ -24,8 +24,8 @@ services:
     networks:
       - webnet
     environment:
-      MYSQL_ROOT_PASSWORD: 
-      MYSQL_DATABASE: dynaprotdbv2
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3307:3306"  # Access MySQL on localhost:3307
     volumes:

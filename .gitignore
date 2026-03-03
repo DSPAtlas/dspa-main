@@ -11,3 +11,6 @@ yarn.lock
 /server.log
 /dynaprotdb.sql
 
+/dspa-main-app.tar
+/dynaprotdb*.sql
+/dynaprotdb*.sql.gz
