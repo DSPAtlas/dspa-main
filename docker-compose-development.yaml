@@ -17,6 +17,11 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_PORT=3306
+      - UNIPROT_CACHE_DIR=./cache/dspatlas
+      - UNIPROT_CACHE_MAX_BYTES=67108864
+      - UNIPROT_CACHE_TTL_MS=2592000000
+    volumes:
+      - ./cache:/app/cache
 
   db:
     image: mysql:8.0
