@@ -8,6 +8,9 @@ SERVER_IP="129.132.53.7"
 SSH_KEY="$HOME/.ssh/id_ed25519"
 REMOTE_DEPLOY_PATH="/home/maudrius/deploy/"
 
+echo "--- 0. Cleanup"
+rm -f $TAR_FILE
+
 echo "--- 1. Building Docker image for linux/amd64 ---"
 
 # Build from the project root (..) but use the Dockerfile in dspa-main
