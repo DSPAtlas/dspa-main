@@ -5,8 +5,9 @@ WORKDIR /usr/src/app
 # Copy the backend files from dspa-main
 COPY dspa-main/ .
 
-# Remove any symlinks copied from dspa-main that might point to nonexistent paths in the image
-RUN rm -f dspa-backend dspa-frontend
+# Remove dspa-backend and dspa-frontend — Docker follows symlinks in the build context,
+# so COPY dspa-main/ above may have brought in real directories (with stale build/ artifacts).
+RUN rm -rf dspa-backend dspa-frontend
 
 # Copy the actual directories for backend and frontend
 COPY dspa-backend/ ./dspa-backend/

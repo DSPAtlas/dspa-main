@@ -14,7 +14,7 @@ rm -f $TAR_FILE
 echo "--- 1. Building Docker image for linux/amd64 ---"
 
 # Build from the project root (..) but use the Dockerfile in dspa-main
-docker build --platform linux/amd64 -t $IMAGE_NAME -f Dockerfile ..
+docker build --no-cache --platform linux/amd64 -t $IMAGE_NAME -f Dockerfile ..
 
 echo "--- 2. Exporting Docker image to $TAR_FILE ---"
 docker save $IMAGE_NAME > $TAR_FILE
