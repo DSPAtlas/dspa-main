@@ -26,6 +26,7 @@ RUN mkdir -p dspa-frontend/node_modules/@dspa-nightingale
 COPY dspa-nightingale-bundle/nightingale-sequence dspa-frontend/node_modules/@dspa-nightingale/nightingale-sequence
 COPY dspa-nightingale-bundle/nightingale-structure dspa-frontend/node_modules/@dspa-nightingale/nightingale-structure
 COPY dspa-nightingale-bundle/nightingale-track dspa-frontend/node_modules/@dspa-nightingale/nightingale-track
+COPY dspa-nightingale-bundle/nightingale-sequence-heatmap dspa-frontend/node_modules/@nightingale-elements/nightingale-sequence-heatmap
 
 # Build the frontend React app (now the folder exists)
 RUN npm run build --prefix dspa-frontend
