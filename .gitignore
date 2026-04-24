@@ -17,4 +17,5 @@ yarn.lock
 /.cache
 /rust
 
+/.env
 /.env_real
