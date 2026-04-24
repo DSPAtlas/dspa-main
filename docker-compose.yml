@@ -1,6 +1,7 @@
 services:
   webapp:
     image: dynaprot/dspa-main-app:latest
+    restart: unless-stopped
     networks:
       - webnet
     depends_on:
@@ -41,6 +42,7 @@ services:
 
   nginx-proxy:
     image: jwilder/nginx-proxy
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -54,17 +56,19 @@ services:
 
   certbot:
     image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: unless-stopped
     volumes:
       - ./certs:/etc/nginx/certs:rw
       - ./vhost.d:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - nginx-proxy
     networks:
       - webnet
     environment:
-      - NGINX_PROXY_CONTAINER=ekrismer-nginx-proxy-1 
+      - NGINX_PROXY_CONTAINER=${COMPOSE_PROJECT_NAME:-ekrismer}-nginx-proxy-1
 
 networks:
   webnet:

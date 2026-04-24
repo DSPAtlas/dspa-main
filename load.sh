@@ -1,49 +1,72 @@
 #!/bin/bash
 
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+if [ -f .env ]; then
+    set -a
+    . ./.env
+    set +a
+fi
+
 # Configuration
+PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ekrismer}"
 IMAGE_NAME="dynaprot/dspa-main-app:latest"
 TAR_FILE="dspa-main-app.tar"
-CONTAINER_NAME="ekrismer-webapp-1"
-BACKUP_TAG="old-$(date +%Y%m%d)"
-BACKUP_CONTAINER="ekrismer-webapp-backup-$(date +%Y%m%d)"
+WEBAPP_SERVICE="webapp"
+WEBAPP_CONTAINER="${PROJECT_NAME}-${WEBAPP_SERVICE}-1"
+PROXY_CONTAINER="${PROJECT_NAME}-nginx-proxy-1"
+BACKUP_TAG="old-$(date +%Y%m%d-%H%M%S)"
 
-echo "--- 1. Backing up the currently running image and container ---"
-# Tag current image as 'old' before we lose 'latest' reference
-if docker image inspect $IMAGE_NAME >/dev/null 2>&1; then
+echo "--- 1. Preparing deployment directories ---"
+mkdir -p cache certs vhost.d html acme
+
+echo "--- 2. Backing up the currently tagged image ---"
+if docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
     echo "Tagging current $IMAGE_NAME as $BACKUP_TAG"
-    docker tag $IMAGE_NAME "dynaprot/dspa-main-app:$BACKUP_TAG"
+    docker tag "$IMAGE_NAME" "dynaprot/dspa-main-app:$BACKUP_TAG"
 fi
 
-# To keep the old container as a backup, stop and rename it before running compose.
-if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER_NAME$"; then
-    echo "Stopping and renaming $CONTAINER_NAME to $BACKUP_CONTAINER"
-    docker stop "$CONTAINER_NAME"
-    docker rename "$CONTAINER_NAME" "$BACKUP_CONTAINER"
-fi
-
-echo "--- 2. Loading Docker image from $TAR_FILE ---"
+echo "--- 3. Loading Docker image from $TAR_FILE ---"
 if [ -f "$TAR_FILE" ]; then
     docker load < "$TAR_FILE"
 else
-    echo "Error: $TAR_FILE not found in current directory."
+    echo "Error: $TAR_FILE not found in $SCRIPT_DIR."
     exit 1
 fi
 
-# 3. Starting the updated webapp container
-echo "--- 3. Starting the updated webapp container ---"
-docker compose -p ekrismer up -d --no-deps webapp
+echo "--- 4. Recreating the webapp container ---"
+docker compose --project-name "$PROJECT_NAME" up -d --no-deps --force-recreate "$WEBAPP_SERVICE"
 
-# Fix: If it's not on webnet, attach it.
-# (Note: Using 'external: true' in docker-compose.yml should do this, but let's be safe)
-if ! docker inspect ekrismer-webapp-1 --format '{{json .NetworkSettings.Networks.webnet}}' | grep -qv "null"; then
-    echo "Connecting ekrismer-webapp-1 to webnet..."
-    docker network connect webnet ekrismer-webapp-1
-    docker restart ekrismer-nginx-proxy-1
+echo "--- 5. Ensuring the webapp is attached to webnet ---"
+if ! docker inspect "$WEBAPP_CONTAINER" --format '{{json .NetworkSettings.Networks}}' | grep -q '"webnet"'; then
+    echo "Connecting $WEBAPP_CONTAINER to webnet..."
+    docker network connect webnet "$WEBAPP_CONTAINER"
+    if docker ps --format '{{.Names}}' | grep -q "^$PROXY_CONTAINER$"; then
+        docker restart "$PROXY_CONTAINER"
+    fi
 fi
 
-echo "--- 4. Cleaning up old containers (optional) ---"
-# Show current status
-docker ps --filter "name=webapp"
+echo "--- 6. Waiting for the webapp to start ---"
+for attempt in $(seq 1 20); do
+    status="$(docker inspect "$WEBAPP_CONTAINER" --format '{{.State.Status}}' 2>/dev/null || true)"
+    if [ "$status" = "running" ]; then
+        echo "$WEBAPP_CONTAINER is running."
+        break
+    fi
+    sleep 1
+done
+
+if [ "${status:-}" != "running" ]; then
+    echo "Error: $WEBAPP_CONTAINER did not reach the running state."
+    docker compose --project-name "$PROJECT_NAME" logs --tail 200 "$WEBAPP_SERVICE" || true
+    exit 1
+fi
+
+echo "--- 7. Current compose status ---"
+docker compose --project-name "$PROJECT_NAME" ps
 
 echo "--- Done ---"
-echo "If the new version fails, you can rollback by renaming the backup container or using the backup image tag."
+echo "If the new version fails, you can rollback by retagging a backup image and redeploying it."
