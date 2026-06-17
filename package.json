@@ -27,20 +27,18 @@
         ]
     },
     "dependencies": {
-        "@nightingale-elements/nightingale-sequence": "^5.2.0",
         "cors": "^2.8.5",
         "debug": "^4.3.5",
         "dotenv": "^16.4.7",
-        "express": "^4.19.2",
+        "express": "^4.22.2",
         "helmet": "^7.1.0",
-        "joi": "^17.13.3",
-        "mathjs": "^13.0.3",
-        "morgan": "^1.10.0",
-        "mysql2": "^3.10.3",
-        "path": "^0.12.7"
+        "joi": "^17.13.4",
+        "morgan": "^1.11.0",
+        "mysql2": "^3.10.3"
     },
     "overrides": {
-        "form-data": "^3.0.4"
+        "form-data": "^3.0.4",
+        "path-to-regexp": "^0.1.13"
     },
     "resolutions": {
         "form-data": "^3.0.4"
