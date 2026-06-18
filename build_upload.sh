@@ -10,6 +10,38 @@ SERVER_USER="maudrius"
 SERVER_IP="129.132.53.7"
 SSH_KEY="$HOME/.ssh/id_ed25519"
 REMOTE_DEPLOY_PATH="/home/maudrius/deploy/"
+BUILD_ONLY=0
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [--build-only]
+
+Build and export $IMAGE_NAME.
+
+Options:
+  --build-only   Stop after the local docker build/save steps. Do not copy files
+                 to the server and do not run the remote deployment script.
+  -h, --help     Show this help.
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --build-only)
+            BUILD_ONLY=1
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Error: unknown argument: $1"
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "Error: $ENV_FILE not found."
@@ -35,6 +67,14 @@ docker build --no-cache --platform linux/amd64 -t "$IMAGE_NAME" -f "$SCRIPT_DIR/
 
 echo "--- 2. Exporting Docker image to $TAR_FILE ---"
 docker save "$IMAGE_NAME" > "$TAR_FILE"
+
+if [ "$BUILD_ONLY" -eq 1 ]; then
+    echo "--- Build-only mode: skipping upload and remote deployment ---"
+    echo "Local image is available as $IMAGE_NAME"
+    echo "Exported image archive is available at $TAR_FILE"
+    echo "--- Done ---"
+    exit 0
+fi
 
 echo "--- 3. Preparing remote deploy directory ---"
 ssh -i "$SSH_KEY" "$SERVER_USER@$SERVER_IP" "mkdir -p '$REMOTE_DEPLOY_PATH'"
