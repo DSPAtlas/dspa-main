@@ -63,7 +63,7 @@ echo "--- 0. Cleanup"
 rm -f "$TAR_FILE"
 
 echo "--- 1. Building Docker image for linux/amd64 ---"
-docker build --no-cache --platform linux/amd64 -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/.."
+docker build --network host --platform linux/amd64 -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/.."
 
 echo "--- 2. Exporting Docker image to $TAR_FILE ---"
 docker save "$IMAGE_NAME" > "$TAR_FILE"

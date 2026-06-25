@@ -2,22 +2,27 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
-# Copy the backend files from dspa-main
+ENV CI=true \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
+
+# Install server dependencies from the lockfile before copying source so this
+# layer is reused unless package metadata changes.
+COPY dspa-main/package*.json ./
+RUN npm ci --omit=dev
+
+# Copy the server and API source.
 COPY dspa-main/ .
-
-# Remove dspa-backend and dspa-frontend — Docker follows symlinks in the build context,
-# so COPY dspa-main/ above may have brought in real directories (with stale build/ artifacts).
 RUN rm -rf dspa-backend dspa-frontend
-
-# Copy the actual directories for backend and frontend
 COPY dspa-backend/ ./dspa-backend/
+
+# Install frontend dependencies from the lockfile before copying source.
+COPY dspa-frontend/package*.json ./dspa-frontend/
+RUN npm ci --omit=dev --prefix dspa-frontend
+
+# Copy the frontend source.
 COPY dspa-frontend/ ./dspa-frontend/
-
-# Install backend dependencies
-RUN npm install
-
-# Install frontend dependencies
-RUN npm install --prefix dspa-frontend
 
 # Clone external dependency into the path the frontend expects
 # Clone Nightingale bundle and copy built modules into node_modules
