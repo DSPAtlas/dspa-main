@@ -1,5 +1,29 @@
+# Ignore dependency directories installed locally. Docker installs its own deps.
+**/node_modules/
 
-deploycommand.sh
-dspa_main_app.tar
-dspa_mysql.tar
-dspasample_dump.sql
+# Ignore local environment files. Compose receives dspa-main/.env separately.
+**/.env
+**/.env.*
+dspa-main/.env_real
+
+# Ignore database dumps and exported Docker images. They are not needed in the app image.
+*.sql
+**/*.sql
+*.tar
+**/*.tar
+
+# Ignore generated build/test/runtime artifacts.
+dspa-frontend/build/
+**/coverage/
+**/playwright-report/
+**/test-results/
+**/*.log
+dspa-main/cache/
+
+# Git and OS metadata
+.git/
+**/.git/
+.gitignore
+**/.gitignore
+.DS_Store
+**/.DS_Store
