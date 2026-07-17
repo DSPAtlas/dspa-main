@@ -1,0 +1,56 @@
+# Run the web application against the persistent database stack from dspa-mcp.
+# Start that stack first so its external database network exists.
+# Use its environment file so both stacks receive the same root password:
+#   docker compose --env-file ../dspa-mcp/.env -f docker-compose-db.yml up -d
+name: dspa-main-db
+
+services:
+  webapp:
+    image: ${DSPA_MAIN_IMAGE:-dynaprot/dspa-main-app:latest}
+    container_name: ${DSPA_MAIN_CONTAINER_NAME:-dspa_main_db}
+    platform: ${DSPA_MAIN_PLATFORM:-linux/amd64}
+    environment:
+      PORT: 8080
+      NODE_ENV: production
+      DB_HOST: database
+      DB_USER: root
+      DB_PASSWORD: ${DSPA_DB_ROOT_PASSWORD:?Load the persistent database root password from ../dspa-mcp/.env}
+      DB_NAME: ${DSPA_MAIN_DB_NAME:-dynaprotdbv2}
+      DB_PORT: 3306
+      UNIPROT_CACHE_DIR: ./cache/dspatlas
+      UNIPROT_CACHE_MAX_BYTES: 67108864
+      UNIPROT_CACHE_TTL_MS: 2592000000
+    ports:
+      - "${DSPA_MAIN_HTTP_HOST:-127.0.0.1}:${DSPA_MAIN_HTTP_PORT:-8080}:8080"
+    networks:
+      public:
+        gw_priority: 1
+      database_access:
+        gw_priority: 0
+    volumes:
+      - type: bind
+        source: ./cache
+        target: /usr/src/app/cache
+        bind:
+          create_host_path: true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8080/api/v1/health')
+          .then(response => process.exit(response.ok ? 0 : 1))
+          .catch(() => process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  public:
+    driver: bridge
+  database_access:
+    name: ${DSPA_DB_NETWORK:-dspa-mcp-db-devel_database_access}
+    external: true
