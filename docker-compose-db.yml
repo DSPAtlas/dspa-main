@@ -27,6 +27,8 @@ services:
         gw_priority: 1
       database_access:
         gw_priority: 0
+      webapp_http:
+        gw_priority: 0
     volumes:
       - type: bind
         source: ./cache
@@ -49,6 +51,9 @@ services:
     restart: unless-stopped
 
 networks:
+  webapp_http:
+    name: ${DSPA_WEBAPP_HTTP_NETWORK:-dspa-mcp-db-devel_webapp_http}
+    external: true
   public:
     driver: bridge
   database_access:
