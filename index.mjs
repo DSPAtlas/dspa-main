@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -15,6 +15,7 @@ import experimentRoutes from './dspa-backend/routes/experimentRoutes.js';
 import conditionRoutes from './dspa-backend/routes/conditionRoutes.js';
 import healthRoutes from './dspa-backend/routes/healthRoutes.js';
 import userRoutes from './routes/userRoutes.mjs';
+import userContext from './dspa-backend/middleware/userContext.js';
 
 const startupDebugger = debug.default('app:startup');
 const dbDebugger = debug.default('app:db');
@@ -22,7 +23,6 @@ const dbDebugger = debug.default('app:db');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -65,12 +65,14 @@ if (app.get('env') === 'development') {
 
 app.use(cors());
 
+// Health checks execute only SELECT 1 and do not require a user identity.
+app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1', userContext);
 app.use('/api/v1/proteins', proteinRoutes);
 app.use('/api/v1/experiments', allExperimentsRoutes);
 app.use('/api/v1/experiment',  experimentRoutes);
 app.use('/api/v1/search',  searchRoutes);
 app.use('/api/v1/condition',  conditionRoutes);
-app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/user', userRoutes);
 
 // Catch-all route for React frontend
@@ -80,6 +82,6 @@ app.get('*', (req, res) => {
 
 dbDebugger('Connected to the database...');
 
-app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
       console.log(`HTTP Server is running on port ${PORT}`);
   });

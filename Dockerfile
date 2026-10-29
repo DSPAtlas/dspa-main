@@ -1,4 +1,8 @@
-FROM node:20
+# syntax=docker/dockerfile:1.7
+ARG DSPA_MCP_DB_IMAGE=registry.ethz.ch/maudrius/dspa-mcp/db:latest
+
+FROM ${DSPA_MCP_DB_IMAGE} AS credentials
+FROM node:20 AS application
 
 WORKDIR /usr/src/app
 
@@ -41,3 +45,16 @@ EXPOSE 8080
 
 # Start backend
 CMD ["node", "index.mjs"]
+
+# Only the persistent stack consumes the exact matching MCP credential bundle.
+FROM application AS persistent
+COPY --from=credentials --chown=root:root --chmod=0400 /etc/dspa-db/webapp.env /etc/dspa-db/webapp.env
+COPY --chmod=0755 dspa-main/db_entrypoint.sh /usr/local/bin/dspa-webapp-entrypoint.sh
+# COPY --chmod can also restrict newly created parent directories. Keep the
+# directory traversable by root while the credential file remains owner-read-only.
+RUN chmod 0700 /etc/dspa-db
+ENTRYPOINT ["/usr/local/bin/dspa-webapp-entrypoint.sh"]
+CMD ["node", "index.mjs"]
+
+# Keep ordinary and fat/shared builds independent of persistent credentials.
+FROM application AS shared

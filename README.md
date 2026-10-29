@@ -3,6 +3,45 @@ The DSPA application consists of a frontend built with React.js, a backend power
 
 This guide walks you through pulling the Docker image, setting up the database, running the application, and managing updates.
 
+## Persistent database with private visualizations
+
+The `db` stack uses `db-webapp`, built together with MCP, MySQL, Adminer, and the importer:
+
+```bash
+cd ../dspa-mcp
+./build_db_image.sh
+```
+
+This packages the current main, backend, frontend, and Nightingale checkouts. The persistent
+target receives matching generated database credentials. `DSPA_DB_WEBAPP_IMAGE`
+selects this image in both persistent Compose files. The ordinary `shared` Docker target
+retains the existing shared database behavior described below.
+
+Browser requests enter through the authenticated MCP gateway. For `/api/v1/` requests, the
+backend validates the gateway's `X-DSPA-Webapp-Token` and canonical `X-User-ID`, resolves the
+numeric owner, and binds each pooled query connection to that owner. Experiments, conditions,
+protein comparisons, and QC PDFs are read through filtered `app` views using
+`dspa_backend_reader`; the webapp receives no root credential. Direct API requests without
+the trusted headers are rejected. Public application assets and `/api/v1/health` require no
+identity; the health check performs only `SELECT 1`.
+
+`DB_USER_CONTEXT_MODE=per-user` enables this behavior and requires `DB_NAME=app`, the reader
+credential, separate identity/context credentials, and the webapp gateway token. The image
+entrypoint loads them from `/etc/dspa-db/webapp.env`. Details and unit-test instructions are in
+[the backend guide](../dspa-backend/README.md). Private API responses use `private, no-store`;
+the optional shared disk cache contains only public UniProt annotations.
+
+With local Node dependencies and MySQL binaries installed, run the complete API isolation test:
+
+```bash
+cd ../dspa-mcp
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_backend_flow.py -v
+```
+
+Use the matching image bundle with a fresh prepared volume or an empty external data directory.
+Existing volumes are not automatically migrated or recredentialed. MCP query isolation has its
+own remaining rollout steps in [import.md](../import.md).
+
 ## ✅ Prerequisites
 - Ensure Docker and Docker Compose are installed on your Linux VM.
 - Access to the Linux VM with appropriate permissions.

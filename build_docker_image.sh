@@ -1,19 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-1}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 IMAGE_NAME="${DSPA_MAIN_IMAGE:-dynaprot/dspa-main-app:latest}"
 PLATFORM="${DSPA_MAIN_PLATFORM:-linux/amd64}"
 DOCKER_BUILD_NETWORK="${DSPA_MAIN_DOCKER_BUILD_NETWORK:-host}"
 NO_CACHE=0
+PERSISTENT=0
+MCP_IMAGE="${DSPA_MCP_DB_IMAGE:-registry.ethz.ch/maudrius/dspa-mcp/db:latest}"
 
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [--image NAME] [--platform PLATFORM] [--no-cache]
+       [--persistent] [--mcp-image NAME]
 
 Build the DSPA web application as a local Docker image. The image is not
 exported to a tar archive and is not uploaded.
+--persistent selects the owner-scoped backend and credentials from --mcp-image.
+The default shared target does not require generated credentials.
 
 Defaults:
   image:          ${IMAGE_NAME}
@@ -35,6 +42,13 @@ while [ "$#" -gt 0 ]; do
         --no-cache)
             NO_CACHE=1
             ;;
+        --persistent)
+            PERSISTENT=1
+            ;;
+        --mcp-image)
+            MCP_IMAGE="${2:?--mcp-image requires a value}"
+            shift
+            ;;
         -h|--help)
             usage
             exit 0
@@ -47,6 +61,11 @@ while [ "$#" -gt 0 ]; do
     esac
     shift
 done
+
+if [ "${PERSISTENT}" -eq 1 ] && [ ! -f "${SCRIPT_DIR}/db_entrypoint.sh" ]; then
+    echo "Error: persistent webapp entrypoint is missing" >&2
+    exit 1
+fi
 
 required_paths=(
     "${SCRIPT_DIR}/Dockerfile"
@@ -72,6 +91,11 @@ build_args=(
     -f dspa-main/Dockerfile
     -t "${IMAGE_NAME}"
 )
+if [ "${PERSISTENT}" -eq 1 ]; then
+    build_args+=(--target persistent --build-arg "DSPA_MCP_DB_IMAGE=${MCP_IMAGE}")
+else
+    build_args+=(--target shared)
+fi
 if [ "${NO_CACHE}" -eq 1 ]; then
     build_args+=(--no-cache)
 fi
@@ -82,6 +106,7 @@ context_excludes=(
     --exclude-vcs
     --exclude='.env'
     --exclude='.env.*'
+    --exclude='.env_*'
     --exclude='node_modules'
     --exclude='*.log'
     --exclude='*.sql'
@@ -92,6 +117,7 @@ context_excludes=(
     --exclude='test-results'
     --exclude='dspa-frontend/build'
     --exclude='dspa-main/cache'
+    --exclude='dspa-main/.cache'
     --exclude='dspa-main/rust'
     --exclude='dspa-main/dspa-backend'
     --exclude='dspa-main/dspa-frontend'
