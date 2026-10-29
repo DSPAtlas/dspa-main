@@ -30,11 +30,21 @@ services:
       webapp_http:
         gw_priority: 0
     volumes:
-      - type: bind
-        source: ./cache
-        target: /usr/src/app/cache
-        bind:
-          create_host_path: true
+      # Optional host cache paths must already be writable by UID 1000 (node).
+      - ${DSPA_MAIN_CACHE_DIR:-webapp_cache}:/usr/src/app/cache
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    privileged: false
+    init: true
+    mem_limit: 1g
+    pids_limit: 128
+    cpus: 2
     healthcheck:
       test:
         - CMD
@@ -49,6 +59,9 @@ services:
       retries: 5
       start_period: 10s
     restart: unless-stopped
+
+volumes:
+  webapp_cache:
 
 networks:
   webapp_http:

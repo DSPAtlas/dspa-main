@@ -48,11 +48,13 @@ CMD ["node", "index.mjs"]
 
 # Only the persistent stack consumes the exact matching MCP credential bundle.
 FROM application AS persistent
-COPY --from=credentials --chown=root:root --chmod=0400 /etc/dspa-db/webapp.env /etc/dspa-db/webapp.env
+COPY --from=credentials --chown=node:node --chmod=0400 /etc/dspa-db/webapp.env /etc/dspa-db/webapp.env
 COPY --chmod=0755 dspa-main/db_entrypoint.sh /usr/local/bin/dspa-webapp-entrypoint.sh
-# COPY --chmod can also restrict newly created parent directories. Keep the
-# directory traversable by root while the credential file remains owner-read-only.
-RUN chmod 0700 /etc/dspa-db
+# Only the runtime user can traverse the credential directory. Docker copies
+# cache-directory ownership into a fresh named volume before dropping privileges.
+RUN chown node:node /etc/dspa-db && chmod 0700 /etc/dspa-db \
+    && install -d -o node -g node -m 0700 /usr/src/app/cache
+USER node:node
 ENTRYPOINT ["/usr/local/bin/dspa-webapp-entrypoint.sh"]
 CMD ["node", "index.mjs"]
 
