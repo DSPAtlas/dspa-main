@@ -38,7 +38,10 @@ COPY dspa-nightingale-bundle/nightingale-track dspa-frontend/node_modules/@dspa-
 COPY dspa-nightingale-bundle/nightingale-sequence-heatmap dspa-frontend/node_modules/@nightingale-elements/nightingale-sequence-heatmap
 
 # Build the frontend React app (now the folder exists)
-RUN npm run build --prefix dspa-frontend
+ARG DSPA_WEBAPP_BASE_PATH=/
+ARG DSPA_WEBAPP_PRIVATE_APP=false
+RUN PUBLIC_URL="${DSPA_WEBAPP_BASE_PATH}" REACT_APP_DSPA_PRIVATE_APP="${DSPA_WEBAPP_PRIVATE_APP}" \
+    npm run build --prefix dspa-frontend
 
 # Expose backend port
 EXPOSE 8080

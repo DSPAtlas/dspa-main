@@ -1,93 +1,53 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -euo pipefail
-
+umask 077
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IMAGE_NAME="dynaprot/dspa-main-app:latest"
+IMAGE_NAME=dynaprot/dspa-main-app:latest
 TAR_FILE="$SCRIPT_DIR/dspa-main-app.tar"
-ENV_FILE="$SCRIPT_DIR/.env"
-SERVER_USER="maudrius"
-SERVER_IP="129.132.53.7"
-SSH_KEY="$HOME/.ssh/id_ed25519"
-REMOTE_DEPLOY_PATH="/home/maudrius/deploy/"
+SERVER_USER="${DSPA_SERVER_USER:-maudrius}"
+SERVER_HOST="${DSPA_SERVER_HOST:-129.132.53.7}"
+SSH_KEY="${DSPA_SSH_KEY:-$HOME/.ssh/id_ed25519}"
+REMOTE_DIR="${DSPA_PUBLIC_APP_DIR:-/home/maudrius/deploy}"
 BUILD_ONLY=0
-
 usage() {
-    cat <<EOF
-Usage: $(basename "$0") [--build-only]
-
-Build and export $IMAGE_NAME.
-
-Options:
-  --build-only   Stop after the local docker build/save steps. Do not copy files
-                 to the server and do not run the remote deployment script.
-  -h, --help     Show this help.
+    cat <<'EOF'
+Usage: ./build_upload.sh [--build-only]
+Build/export the public root frontend and update the existing public website.
+The existing remote .env, database volume, and shared Caddy ingress are retained.
+Initialize the complete server with dspa-mcp/build_upload_server.sh before using
+this website-only updater. --build-only performs no remote access.
 EOF
 }
-
-while [ "$#" -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
     case "$1" in
-        --build-only)
-            BUILD_ONLY=1
-            ;;
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        *)
-            echo "Error: unknown argument: $1"
-            usage
-            exit 1
-            ;;
+        --build-only) BUILD_ONLY=1 ;;
+        -h|--help) usage; exit 0 ;;
+        *) usage >&2; exit 2 ;;
     esac
     shift
 done
-
-if [ ! -f "$ENV_FILE" ]; then
-    echo "Error: $ENV_FILE not found."
-    exit 1
-fi
-
-set -a
-. "$ENV_FILE"
-set +a
-
-for required_var in COMPOSE_PROJECT_NAME DB_USER DB_PASSWORD DB_NAME; do
-    if [ -z "${!required_var:-}" ]; then
-        echo "Error: $required_var is empty in $ENV_FILE."
-        exit 1
-    fi
-done
-
-echo "--- 0. Cleanup"
-rm -f "$TAR_FILE"
-
-echo "--- 1. Building Docker image for linux/amd64 ---"
-docker build --network host --platform linux/amd64 -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/.."
-
-echo "--- 2. Exporting Docker image to $TAR_FILE ---"
-docker save "$IMAGE_NAME" > "$TAR_FILE"
-
-if [ "$BUILD_ONLY" -eq 1 ]; then
-    echo "--- Build-only mode: skipping upload and remote deployment ---"
-    echo "Local image is available as $IMAGE_NAME"
-    echo "Exported image archive is available at $TAR_FILE"
-    echo "--- Done ---"
+REMOTE_DIR="${REMOTE_DIR%/}"
+[[ "$REMOTE_DIR" =~ ^/[A-Za-z0-9_./-]+$ && "$REMOTE_DIR" != / && "/${REMOTE_DIR#/}/" != *'/../'* && "/${REMOTE_DIR#/}/" != *'/./'* ]] || {
+    echo 'Invalid public deployment path.' >&2; exit 2;
+}
+[[ "$SERVER_USER" =~ ^[A-Za-z0-9_-]+$ && "$SERVER_HOST" =~ ^[A-Za-z0-9.-]+$ && "$SERVER_HOST" != -* ]] || {
+    echo 'Invalid SSH user or host.' >&2; exit 2;
+}
+bash "$SCRIPT_DIR/build_docker_image.sh" --image "$IMAGE_NAME" --base-path /
+docker save --output "$TAR_FILE" "$IMAGE_NAME"
+if [[ "$BUILD_ONLY" == 1 ]]; then
+    printf 'Public image exported to %s; no remote access performed.\n' "$TAR_FILE"
     exit 0
 fi
-
-echo "--- 3. Preparing remote deploy directory ---"
-ssh -i "$SSH_KEY" "$SERVER_USER@$SERVER_IP" "mkdir -p '$REMOTE_DEPLOY_PATH'"
-
-echo "--- 4. Transferring files to $SERVER_IP:$REMOTE_DEPLOY_PATH ---"
-scp -C -i "$SSH_KEY" \
-    "$TAR_FILE" \
-    "$SCRIPT_DIR/load.sh" \
-    "$SCRIPT_DIR/docker-compose.yml" \
-    "$SERVER_USER@$SERVER_IP:$REMOTE_DEPLOY_PATH"
-scp -C -i "$SSH_KEY" "$ENV_FILE" "$SERVER_USER@$SERVER_IP:${REMOTE_DEPLOY_PATH}.env"
-
-echo "--- 5. Executing remote deployment script ---"
-ssh -i "$SSH_KEY" "$SERVER_USER@$SERVER_IP" "cd '$REMOTE_DEPLOY_PATH' && test -f .env && chmod +x load.sh && ./load.sh"
-
-echo "--- Done ---"
+remote="$SERVER_USER@$SERVER_HOST"
+ssh -i "$SSH_KEY" "$remote" bash -s -- "$REMOTE_DIR" <<'REMOTE'
+set -euo pipefail
+[[ -f "$1/.env" ]] || { echo 'Existing public website .env is missing.' >&2; exit 1; }
+REMOTE
+scp -C -i "$SSH_KEY" "$TAR_FILE" "$SCRIPT_DIR/load.sh" "$SCRIPT_DIR/docker-compose.yml" "$remote:$REMOTE_DIR/"
+ssh -i "$SSH_KEY" "$remote" bash -s -- "$REMOTE_DIR" <<'REMOTE'
+set -euo pipefail
+cd "$1"
+chmod +x load.sh
+./load.sh
+REMOTE

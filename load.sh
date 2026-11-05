@@ -1,72 +1,68 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
+# Update the existing public website without changing its database or HTTPS ingress.
 set -euo pipefail
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
-
-if [ -f .env ]; then
-    set -a
-    . ./.env
-    set +a
+[[ -f .env ]] || { echo 'The existing public website .env is required.' >&2; exit 1; }
+declare -A explicit_environment=()
+for variable in "${!DSPA_@}"; do
+    [[ -z "$variable" ]] || explicit_environment["$variable"]="${!variable}"
+done
+set -a
+# shellcheck source=/dev/null
+source ./.env
+set +a
+for variable in "${!explicit_environment[@]}"; do
+    export "$variable=${explicit_environment[$variable]}"
+done
+unset variable explicit_environment
+PROJECT_NAME="${DSPA_PUBLIC_APP_PROJECT:-${COMPOSE_PROJECT_NAME:-ekrismer}}"
+IMAGE_NAME=dynaprot/dspa-main-app:latest
+TAR_FILE="${DSPA_PUBLIC_IMAGE_ARCHIVE:-$SCRIPT_DIR/dspa-main-app.tar}"
+compose=(docker compose --project-directory "$SCRIPT_DIR" --env-file "$SCRIPT_DIR/.env"
+    --project-name "$PROJECT_NAME" -f "$SCRIPT_DIR/docker-compose.yml")
+[[ -f "$TAR_FILE" ]] || { echo "Missing image archive: $TAR_FILE" >&2; exit 1; }
+# The full deployment may select its ingress network in a separate MCP .env.
+# Retain the existing attachment when the public environment has no selection.
+if [[ -z "${DSPA_EDGE_NETWORK:-}" ]]; then
+    existing_container="$(docker ps -aq \
+        --filter "label=com.docker.compose.project=$PROJECT_NAME" \
+        --filter 'label=com.docker.compose.service=webapp')"
+    if [[ -z "$existing_container" || "$existing_container" == *$'\n'* ]]; then
+        echo 'Cannot identify one existing public webapp; set DSPA_EDGE_NETWORK or initialize the complete server with dspa-mcp/run_server.sh.' >&2
+        exit 1
+    fi
+    existing_edge="$(docker inspect "$existing_container" --format \
+        '{{range $name, $network := .NetworkSettings.Networks}}{{range $network.Aliases}}{{if eq . "dspa_public_webapp"}}{{println $name}}{{end}}{{end}}{{end}}')"
+    if [[ -z "$existing_edge" || "$existing_edge" == *$'\n'* ]]; then
+        echo 'Cannot identify one existing ingress network; set DSPA_EDGE_NETWORK or initialize the complete server with dspa-mcp/run_server.sh.' >&2
+        exit 1
+    fi
+    DSPA_EDGE_NETWORK="$existing_edge"
 fi
-
-# Configuration
-PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ekrismer}"
-IMAGE_NAME="dynaprot/dspa-main-app:latest"
-TAR_FILE="dspa-main-app.tar"
-WEBAPP_SERVICE="webapp"
-WEBAPP_CONTAINER="${PROJECT_NAME}-${WEBAPP_SERVICE}-1"
-PROXY_CONTAINER="${PROJECT_NAME}-nginx-proxy-1"
-BACKUP_TAG="old-$(date +%Y%m%d-%H%M%S)"
-
-echo "--- 1. Preparing deployment directories ---"
-mkdir -p cache certs vhost.d html acme
-
-echo "--- 2. Backing up the currently tagged image ---"
-if docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-    echo "Tagging current $IMAGE_NAME as $BACKUP_TAG"
-    docker tag "$IMAGE_NAME" "dynaprot/dspa-main-app:$BACKUP_TAG"
-fi
-
-echo "--- 3. Loading Docker image from $TAR_FILE ---"
-if [ -f "$TAR_FILE" ]; then
-    docker load < "$TAR_FILE"
-else
-    echo "Error: $TAR_FILE not found in $SCRIPT_DIR."
+export DSPA_EDGE_NETWORK
+"${compose[@]}" config --quiet
+if ! docker network inspect "$DSPA_EDGE_NETWORK" >/dev/null 2>&1; then
+    echo 'Shared ingress network is missing; initialize the complete server with dspa-mcp/run_server.sh first.' >&2
     exit 1
 fi
-
-echo "--- 4. Recreating the webapp container ---"
-docker compose --project-name "$PROJECT_NAME" up -d --no-deps --force-recreate "$WEBAPP_SERVICE"
-
-echo "--- 5. Ensuring the webapp is attached to webnet ---"
-if ! docker inspect "$WEBAPP_CONTAINER" --format '{{json .NetworkSettings.Networks}}' | grep -q '"webnet"'; then
-    echo "Connecting $WEBAPP_CONTAINER to webnet..."
-    docker network connect webnet "$WEBAPP_CONTAINER"
-    if docker ps --format '{{.Names}}' | grep -q "^$PROXY_CONTAINER$"; then
-        docker restart "$PROXY_CONTAINER"
-    fi
+mkdir -p cache
+if docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+    docker tag "$IMAGE_NAME" "dynaprot/dspa-main-app:old-$(date +%Y%m%d-%H%M%S)"
 fi
-
-echo "--- 6. Waiting for the webapp to start ---"
-for attempt in $(seq 1 20); do
-    status="$(docker inspect "$WEBAPP_CONTAINER" --format '{{.State.Status}}' 2>/dev/null || true)"
-    if [ "$status" = "running" ]; then
-        echo "$WEBAPP_CONTAINER is running."
-        break
+docker load --input "$TAR_FILE"
+# Network membership is declared in Compose. The shared Caddy process stays running.
+"${compose[@]}" up -d --no-deps --force-recreate webapp
+container="$("${compose[@]}" ps -q webapp)"
+[[ -n "$container" ]] || { echo 'Public webapp container was not created.' >&2; exit 1; }
+for ((attempt = 1; attempt <= 20; attempt++)); do
+    status="$(docker inspect "$container" --format '{{.State.Status}}')"
+    if [[ "$status" == running ]]; then
+        "${compose[@]}" ps
+        echo 'Public website image updated; database and shared ingress retained.'
+        exit 0
     fi
     sleep 1
 done
-
-if [ "${status:-}" != "running" ]; then
-    echo "Error: $WEBAPP_CONTAINER did not reach the running state."
-    docker compose --project-name "$PROJECT_NAME" logs --tail 200 "$WEBAPP_SERVICE" || true
-    exit 1
-fi
-
-echo "--- 7. Current compose status ---"
-docker compose --project-name "$PROJECT_NAME" ps
-
-echo "--- Done ---"
-echo "If the new version fails, you can rollback by retagging a backup image and redeploying it."
+echo 'Public webapp did not reach the running state.' >&2
+exit 1

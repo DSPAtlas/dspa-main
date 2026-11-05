@@ -10,17 +10,20 @@ PLATFORM="${DSPA_MAIN_PLATFORM:-linux/amd64}"
 DOCKER_BUILD_NETWORK="${DSPA_MAIN_DOCKER_BUILD_NETWORK:-host}"
 NO_CACHE=0
 PERSISTENT=0
+BASE_PATH="${DSPA_WEBAPP_BASE_PATH-}"
 MCP_IMAGE="${DSPA_MCP_DB_IMAGE:-registry.ethz.ch/maudrius/dspa-mcp/db:latest}"
 
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [--image NAME] [--platform PLATFORM] [--no-cache]
-       [--persistent] [--mcp-image NAME]
+       [--persistent] [--mcp-image NAME] [--base-path PATH]
 
 Build the DSPA web application as a local Docker image. The image is not
 exported to a tar archive and is not uploaded.
 --persistent selects the owner-scoped backend and credentials from --mcp-image.
 The default shared target does not require generated credentials.
+The frontend base defaults to /; use /db for the protected production mount.
+Override with --base-path or DSPA_WEBAPP_BASE_PATH; rebuild to change it.
 
 Defaults:
   image:          ${IMAGE_NAME}
@@ -45,6 +48,10 @@ while [ "$#" -gt 0 ]; do
         --persistent)
             PERSISTENT=1
             ;;
+        --base-path)
+            BASE_PATH="${2:?--base-path requires a value}"
+            shift
+            ;;
         --mcp-image)
             MCP_IMAGE="${2:?--mcp-image requires a value}"
             shift
@@ -61,6 +68,14 @@ while [ "$#" -gt 0 ]; do
     esac
     shift
 done
+
+BASE_PATH="${BASE_PATH:-/}"
+BASE_PATH="${BASE_PATH%/}"
+if [[ -n "$BASE_PATH" && ! "$BASE_PATH" =~ ^/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*$ ]]; then
+    echo "Error: frontend base path must be / or a local path such as /db" >&2
+    exit 1
+fi
+BASE_PATH="${BASE_PATH:-/}"
 
 if [ "${PERSISTENT}" -eq 1 ] && [ ! -f "${SCRIPT_DIR}/db_entrypoint.sh" ]; then
     echo "Error: persistent webapp entrypoint is missing" >&2
@@ -90,9 +105,11 @@ build_args=(
     --network "${DOCKER_BUILD_NETWORK}"
     -f dspa-main/Dockerfile
     -t "${IMAGE_NAME}"
+    --build-arg "DSPA_WEBAPP_BASE_PATH=${BASE_PATH}"
 )
 if [ "${PERSISTENT}" -eq 1 ]; then
-    build_args+=(--target persistent --build-arg "DSPA_MCP_DB_IMAGE=${MCP_IMAGE}")
+    build_args+=(--target persistent --build-arg "DSPA_MCP_DB_IMAGE=${MCP_IMAGE}" \
+        --build-arg DSPA_WEBAPP_PRIVATE_APP=true)
 else
     build_args+=(--target shared)
 fi

@@ -3,14 +3,13 @@ services:
     image: dynaprot/dspa-main-app:latest
     restart: unless-stopped
     networks:
-      - webnet
+      webnet:
+      edge:
+        aliases:
+          - dspa_public_webapp
     depends_on:
       - db
     environment:
-      - VIRTUAL_HOST=dynaprot.org,www.dynaprot.org
-      - VIRTUAL_PORT=8080
-      - LETSENCRYPT_HOST=dynaprot.org,www.dynaprot.org
-      - LETSENCRYPT_EMAIL=dynaprot@imsb.biol.ethz.ch 
       - PORT=8080
       - NODE_ENV=production
       - DB_HOST=db
@@ -34,44 +33,17 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       # This would create database as per this script if the volume is missing
       - ./dynaprotdb.sql:/docker-entrypoint-initdb.d/dynaprotdb.sql
 
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs:rw
-      - ./vhost.d:/etc/nginx/vhost.d
-      - ./html:/usr/share/nginx/html
-    networks:
-      - webnet
-
-  certbot:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    restart: unless-stopped
-    volumes:
-      - ./certs:/etc/nginx/certs:rw
-      - ./vhost.d:/etc/nginx/vhost.d
-      - ./html:/usr/share/nginx/html
-      - ./acme:/etc/acme.sh
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      - nginx-proxy
-    networks:
-      - webnet
-    environment:
-      - NGINX_PROXY_CONTAINER=${COMPOSE_PROJECT_NAME:-ekrismer}-nginx-proxy-1
-
 networks:
   webnet:
+    external: true
+  edge:
+    name: ${DSPA_EDGE_NETWORK:-dspa_edge}
     external: true
 
 volumes:
